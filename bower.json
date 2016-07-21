@@ -1,0 +1,39 @@
+{
+  "name": "kaleidoscope",
+  "description": "Mass Media Analysis: To what extent does mainstream media influence what we talk about and believe?",
+  "main": "index.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "authors": [
+    "Arthur Pachachura <pachachura.arthur@gmail.com>"
+  ],
+  "keywords": [
+    "media",
+    "bias",
+    "sentiment",
+    "analysis",
+    "mainstream",
+    "machine",
+    "learning",
+    "current",
+    "events"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/smo-key/kaleidoscope",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "lib",
+    "test",
+    "tests"
+  ]
+}

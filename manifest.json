@@ -1,0 +1,7 @@
+{
+  "name": "kaleidoscope",
+  "short_name": "kaleidoscope",
+  "description": "Mass Media Analysis: To what extent does mainstream media influence what we talk about and believe?",
+  "start_url": "/",
+  "display": "standalone"
+}
