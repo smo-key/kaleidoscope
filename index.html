@@ -33,23 +33,15 @@
       function sleep(time) {
         return new Promise((resolve) => setTimeout(resolve, time));
       }
-      function shuffle(array) {
-        var currentIndex = array.length, temporaryValue, randomIndex;
-
-        // While there remain elements to shuffle...
-        while (0 !== currentIndex) {
-
-          // Pick a remaining element...
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex -= 1;
-
-          // And swap it with the current element.
-          temporaryValue = array[currentIndex];
-          array[currentIndex] = array[randomIndex];
-          array[randomIndex] = temporaryValue;
+      function shuffle(a) {
+        var j, x, i;
+        for (i = a.length; i; i--) {
+          j = Math.floor(Math.random() * i);
+          x = a[i - 1];
+          a[i - 1] = a[j];
+          a[j] = x;
         }
-
-        return array;
+        return a;
       }
 
       /** PLACEHOLDER ANIMATION **/
@@ -95,10 +87,20 @@
       .fail(function() {
         console.warn("Failed to get stats data");
       });
-      //Get tranding suggestions
+      //Get trending suggestions
       $.get(server + "/api/1/trending/suggest")
       .done(function(data) {
-        searchSuggestTrending = shuffle(data.list);
+        console.log(data);
+        searchSuggestTrending = [ ];
+        for (var j=0; j<data.list.length; j+=4)
+        {
+          var sublist = data.list.slice(j, j+4);
+          sublist = shuffle(sublist);
+          searchSuggestTrending.push(sublist[0]);
+          searchSuggestTrending.push(sublist[1]);
+          searchSuggestTrending.push(sublist[2]);
+          searchSuggestTrending.push(sublist[3]);
+        }
       })
       .fail(function() {
         console.warn("Failed to get trending suggestions");
@@ -109,9 +111,8 @@
       //Get tranding image
       $.get(server + "/api/1/trending/images")
       .done(function(data) {
-        console.log(data.images);
+        console.log(data);
         var image = data.images[Math.floor(Math.random()*data.images.length)];
-        console.log(image);
         $("#app-index").css("background-image", "url('" + image.url + "')");
         $("#image-credit").html("<strong><a style='color: rgba(255, 255, 255, 0.8)!important' href='" + image.articleUrl + "'>" + (image.caption.length > 0 ? image.caption : image.articleTitle)+ "</a></strong><br>Image credit: " + image.copyright);
       })
