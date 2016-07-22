@@ -27,10 +27,31 @@ app.get('/api/1/stats/string', function(req, res) {
       console.error(error);
     }
     else {
-      var data = JSON.parse(body);
-      var string = "Searching <strong>" + addCommas(data.totalArticleCount) + "</strong> articles from <strong>" + addCommas(data.totalSourceCount) + "</strong> news sources";
-      var json = { statString: string };
-      res.status(200).json(json);
+      var json = JSON.parse(body);
+      var string = "Searching <strong>" + addCommas(json.totalArticleCount) + "</strong> articles from <strong>" + addCommas(json.totalSourceCount) + "</strong> news sources";
+      var out = { statString: string };
+      res.status(200).json(out);
+    }
+  });
+});
+
+app.get('/api/1/suggest/trending', function(req, res) {
+  request('http://eventregistry.org/jsonCache/trends?action=getConceptTrendGroups&conceptType=org&conceptType=person&conceptType=loc&conceptCount=5&conceptIncludeConceptImage=false&conceptIncludeConceptTrendingHistory=false&conceptLang=eng&maxCacheAge=1&source=news&type=concept', function(error, response, body) {
+    if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+    if (error || response.statusCode != 200) {
+      res.status(500).json({ error: error });
+      console.error(error);
+    }
+    else {
+      var json = JSON.parse(body);
+      var out = { list: [ ] };
+      for (var i=0; i<json.person.trendingConcepts.length; i++)
+      {
+        out.list.push(json.person.trendingConcepts[i].label.eng);
+        out.list.push(json.org.trendingConcepts[i].label.eng);
+        out.list.push(json.loc.trendingConcepts[i].label.eng);
+      }
+      res.status(200).json(out);
     }
   });
 });

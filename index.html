@@ -33,13 +33,32 @@
       function sleep(time) {
         return new Promise((resolve) => setTimeout(resolve, time));
       }
+      function shuffle(array) {
+        var currentIndex = array.length, temporaryValue, randomIndex;
+
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex -= 1;
+
+          // And swap it with the current element.
+          temporaryValue = array[currentIndex];
+          array[currentIndex] = array[randomIndex];
+          array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+      }
 
       /** PLACEHOLDER ANIMATION **/
       var i = 0;
+      var searchSuggestTrending = [""];
       function placeholderLoop()
       {
         sleep(1000).then(() => {
-          $("#search-main").attr("placeholder", "Magic Beans " + ++i);
+          $("#search-main").attr("placeholder", searchSuggestTrending[i++ % searchSuggestTrending.length]);
           $('paper-input.search:not([active="true"]) input').css("opacity", 1);
           sleep(1000).then(() => {
             sleep(2000).then(() => {
@@ -65,10 +84,12 @@
         $("paper-input.search input").css("opacity", 1);
         $("paper-input.search").attr("active", !empty);
       });
-      placeholderLoop();
+
+
 
       /** IMMEDIATE API CALLS **/
       const server = "http://localhost:8001"
+      //Get usage stats
       $.get(server + "/api/1/stats/string")
       .done(function(data) {
         $("#main-stat").html(data.statString);
@@ -76,9 +97,17 @@
       .fail(function() {
         console.warn("Failed to get stats data");
       })
-      /*.always(function() {
-        console.log("")
-      });*/
+      //Get
+      $.get(server + "/api/1/suggest/trending")
+      .done(function(data) {
+        searchSuggestTrending = shuffle(data.list);
+      })
+      .fail(function() {
+        console.warn("Failed to get trending suggestions");
+      })
+      .always(function() {
+        placeholderLoop();
+      });
 
     </script>
   </body>
