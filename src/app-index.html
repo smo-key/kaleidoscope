@@ -1,27 +1,125 @@
-<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/paper-styles/color.html">
+<link rel="import" href="../lib/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../lib/paper-input/paper-input.html">
+<link rel="import" href="../lib/paper-button/paper-button.html">
+<link rel="import" href="../lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../lib/paper-progress/paper-progress.html">
+<link rel="import" href="../lib/iron-icon/iron-icon.html">
+<link rel="import" href="mdi.html">
 
 <dom-module id="app-index">
   <template>
-    <style>
+    <style is="custom-style">
+      /** BASE **/
       :host {
         display: block;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--paper-purple-700) 0%, var(--paper-purple-500) 100%);
+        color: #fff;
+        font-family: 'Roboto', 'Noto', sans-serif;
       }
+      h1, h2, h3, h4, h5
+      {
+        font-weight: 300;
+      }
+
+      /** TOOLBAR **/
+      paper-toolbar
+      {
+        --paper-toolbar-background: var(--paper-purple-700);
+        font-family: 'Roboto', 'Noto', sans-serif;
+      }
+
+      /** CONTAINERS **/
+      div.main
+      {
+        display: block
+      }
+      div.main.centered
+      {
+        display: flex;
+        text-align: left;
+        justify-content: center;
+        box-sizing: border-box;
+        align-items: center;
+        position: absolute;
+        top: 64px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin-top: -64px;
+        overflow: hidden;
+      }
+
+      /** INPUT **/
+      paper-input.search
+      {
+        margin-top: -24px;
+        --paper-input-container-input: {
+          font-size: 32px;
+          color: rgba(255, 255, 255, var(--light-primary-opacity));
+          padding-bottom: 6px;
+          font-weight: 500;
+          opacity: 1;
+          transition: opacity 1s;
+        };
+        --paper-input-container-color: rgba(255, 255, 255, var(--light-secondary-opacity));
+        --paper-input-container-focus-color: rgba(255, 255, 255, var(--light-primary-opacity));
+      }
+      paper-input.search iron-icon[prefix]
+      {
+        width: 42px;
+        height: 42px;
+        position: relative;
+        top: -2px;
+        margin-right: 8px;
+        color: rgba(255, 255, 255, var(--light-secondary-opacity));
+      }
+      paper-input.search paper-icon-button[suffix]
+      {
+        position: relative;
+        top: -2px;
+      }
+
+      /** BUTTONS **/
+
     </style>
-    <h2>Hello [[prop1]]</h2>
+
+    <paper-toolbar>
+      <div class="container">
+        <span class="title">Project Kaleidoscope</span>
+      </div>
+    </paper-toolbar>
+    <div class="main centered">
+      <div class="container">
+        <h2 style="text-align: center">Compare real world events to real people's reactions.</h2><br><br>
+
+        <h3 style="text-align: center">Enter any person, <span style="opacity:0.9">place, </span><span style="opacity:0.8">organization, </span><span style="opacity:0.7">event, </span><span style="opacity:0.6">or idea in the media.</span></h3>
+
+        <paper-input id="search-main" class="search" placeholder="Donald Trump"><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
+
+        <p style="text-align:right;opacity:0.4">Searching <strong>128,282,258</strong> articles from <strong>149,395</strong> news sources</p>
+      </div>
+    </div>
+
   </template>
 
   <script>
     Polymer({
-
       is: 'app-index',
-
       properties: {
         prop1: {
           type: String,
           value: 'app-index',
         },
       },
-
     });
   </script>
 </dom-module>

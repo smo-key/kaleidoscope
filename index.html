@@ -2,14 +2,52 @@
 
 <html>
   <head>
-    <title>kaleidoscope</title>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Kaleidoscope</title>
+
     <link rel="manifest" href="/manifest.json">
     <script src="/lib/webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link href="/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="import" href="/src/app-index.html">
   </head>
   <body>
     <app-index></app-index>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script>
+
+      function sleep(time) {
+        return new Promise((resolve) => setTimeout(resolve, time));
+      }
+
+      var i = 0;
+      function placeholderLoop()
+      {
+        sleep(1000).then(() => {
+          $("#search-main").attr("placeholder", "Magic Beans " + ++i);
+          $('paper-input.search:not([active="true"]) input').css("opacity", 1);
+          sleep(1000).then(() => {
+            sleep(2000).then(() => {
+              $('paper-input.search:not([active="true"]) input').css("opacity", 0);
+              placeholderLoop();
+            });
+          });
+        })
+      }
+      $("paper-input.search input").css("opacity", 0);
+      $("paper-input.search input").on("change paste keyup", function()
+      {
+        console.log($("paper-input.search input").val());
+        $("paper-input.search input").css("opacity", 1);
+        $("paper-input.search").attr("active", !($("paper-input.search input").val().length === 0));
+      });
+      placeholderLoop();
+
+    </script>
   </body>
 </html>
