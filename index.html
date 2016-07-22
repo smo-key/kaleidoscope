@@ -15,7 +15,7 @@
     <link rel="import" href="/src/app-index.html">
   </head>
   <body>
-    <app-index></app-index>
+    <app-index id="app-index" style="background-size:cover;background-position:center"></app-index>
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -23,11 +23,11 @@
     <script>
 
       /** PRETTY PATTERN - EXTREMELY IMPORTANT!!! **/
-      var pattern = Trianglify({
-          width: window.innerWidth,
-          height: window.innerHeight
-      });
-      document.body.appendChild(pattern.canvas());
+      // var pattern = Trianglify({
+      //     width: window.innerWidth,
+      //     height: window.innerHeight
+      // });
+      // document.body.appendChild(pattern.canvas());
 
       /** UTILITIES (WATER, GAS, ETC.) **/
       function sleep(time) {
@@ -85,8 +85,6 @@
         $("paper-input.search").attr("active", !empty);
       });
 
-
-
       /** IMMEDIATE API CALLS **/
       const server = "http://localhost:8001"
       //Get usage stats
@@ -96,9 +94,9 @@
       })
       .fail(function() {
         console.warn("Failed to get stats data");
-      })
-      //Get
-      $.get(server + "/api/1/suggest/trending")
+      });
+      //Get tranding suggestions
+      $.get(server + "/api/1/trending/suggest")
       .done(function(data) {
         searchSuggestTrending = shuffle(data.list);
       })
@@ -107,6 +105,18 @@
       })
       .always(function() {
         placeholderLoop();
+      });
+      //Get tranding image
+      $.get(server + "/api/1/trending/images")
+      .done(function(data) {
+        console.log(data.images);
+        var image = data.images[Math.floor(Math.random()*data.images.length)];
+        console.log(image);
+        $("#app-index").css("background-image", "url('" + image.url + "')");
+        $("#image-credit").html("<strong><a style='color: rgba(255, 255, 255, 0.8)!important' href='" + image.articleUrl + "'>" + (image.caption.length > 0 ? image.caption : image.articleTitle)+ "</a></strong><br>Image credit: " + image.copyright);
+      })
+      .fail(function() {
+        console.warn("Failed to get trending image");
       });
 
     </script>

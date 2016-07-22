@@ -35,12 +35,12 @@ app.get('/api/1/stats/string', function(req, res) {
   });
 });
 
-app.get('/api/1/suggest/trending', function(req, res) {
+app.get('/api/1/trending/suggest', function(req, res) {
   request('http://eventregistry.org/jsonCache/trends?action=getConceptTrendGroups&conceptType=org&conceptType=person&conceptType=loc&conceptCount=5&conceptIncludeConceptImage=false&conceptIncludeConceptTrendingHistory=false&conceptLang=eng&maxCacheAge=1&source=news&type=concept', function(error, response, body) {
     if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
     if (error || response.statusCode != 200) {
-      res.status(500).json({ error: error });
       console.error(error);
+      res.status(500).json({ error: error });
     }
     else {
       var json = JSON.parse(body);
@@ -52,6 +52,71 @@ app.get('/api/1/suggest/trending', function(req, res) {
         out.list.push(json.loc.trendingConcepts[i].label.eng);
       }
       res.status(200).json(out);
+    }
+  });
+});
+
+
+function parseTrendingImages(json)
+{
+  var images = [ ];
+
+  var count = json.results.length > 10 ? 10 : json.results.length;
+  for (var i=0; i<count; i++)
+  {
+    var item = { title: json.results[i].title, url: json.results[i].url, image: null }
+    for (var j=0; j<json.results[i].multimedia.length; j++)
+    {
+      if (json.results[i].multimedia[j].type == "image" && json.results[i].multimedia[j].format == "superJumbo")
+      {
+        var image = { caption: json.results[i].multimedia[j].caption, url: json.results[i].multimedia[j].url, copyright: json.results[i].multimedia[j].copyright, articleUrl: json.results[i].url, articleTitle: json.results[i].title };
+        item.image = image;
+      }
+    }
+    if (item.image !== null)
+    {
+      images.push(image);
+    }
+  }
+
+  return images;
+}
+app.get('/api/1/trending/images', function(req, res) {
+  request('https://api.nytimes.com/svc/topstories/v2/home.json?apikey=***REMOVED***', function(error, response, body1) {
+    if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+    if (error || response.statusCode != 200) {
+      res.status(500).json({ error: error });
+      console.error(error);
+    }
+    else {
+      var json1 = JSON.parse(body1);
+      var out = { copyright: json1.copyright, images: [ ] };
+      var im1 = parseTrendingImages(json1, out);
+
+      request('https://api.nytimes.com/svc/topstories/v2/world.json?apikey=***REMOVED***', function(error, response, body2) {
+        if (error || response.statusCode != 200) {
+          res.status(500).json({ error: error });
+          console.error(error);
+        }
+        else {
+          var json2 = JSON.parse(body2);
+          var im2 = parseTrendingImages(json2, out);
+
+          request('https://api.nytimes.com/svc/topstories/v2/opinion.json?apikey=***REMOVED***', function(error, response, body3) {
+            if (error || response.statusCode != 200) {
+              res.status(500).json({ error: error });
+              console.error(error);
+            }
+            else {
+              json3 = JSON.parse(body3);
+              var im3 = parseTrendingImages(json3, out);
+              var images = im1.concat(im2).concat(im3);
+              out.images = images;
+              res.status(200).json(out);
+            }
+          });
+        }
+      });
     }
   });
 });
