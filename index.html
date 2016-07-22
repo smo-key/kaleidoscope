@@ -19,12 +19,22 @@
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/trianglify/0.4.0/trianglify.min.js"></script>
     <script>
 
+      /** PRETTY PATTERN - EXTREMELY IMPORTANT!!! **/
+      var pattern = Trianglify({
+          width: window.innerWidth,
+          height: window.innerHeight
+      });
+      document.body.appendChild(pattern.canvas());
+
+      /** UTILITIES (WATER, GAS, ETC.) **/
       function sleep(time) {
         return new Promise((resolve) => setTimeout(resolve, time));
       }
 
+      /** PLACEHOLDER ANIMATION **/
       var i = 0;
       function placeholderLoop()
       {
@@ -40,13 +50,35 @@
         })
       }
       $("paper-input.search input").css("opacity", 0);
+      $("paper-input.search input").css("transition", "opacity 1s");
       $("paper-input.search input").on("change paste keyup", function()
       {
-        console.log($("paper-input.search input").val());
+        //Change blinking state
+        var empty = ($("paper-input.search input").val().length === 0);
+        if (empty)
+        {
+          $("paper-input.search input").css("transition", "opacity 1s");
+        }
+        else {
+          $("paper-input.search input").css("transition", "none");
+        }
         $("paper-input.search input").css("opacity", 1);
-        $("paper-input.search").attr("active", !($("paper-input.search input").val().length === 0));
+        $("paper-input.search").attr("active", !empty);
       });
       placeholderLoop();
+
+      /** IMMEDIATE API CALLS **/
+      const server = "http://localhost:8001"
+      $.get(server + "/api/1/stats/string")
+      .done(function(data) {
+        $("#main-stat").html(data.statString);
+      })
+      .fail(function() {
+        console.warn("Failed to get stats data");
+      })
+      /*.always(function() {
+        console.log("")
+      });*/
 
     </script>
   </body>

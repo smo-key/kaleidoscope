@@ -27,5 +27,9 @@
   "bugs": {
     "url": "https://github.com/smo-key/kaleidoscope/issues"
   },
-  "homepage": "https://github.com/smo-key/kaleidoscope#readme"
+  "homepage": "https://github.com/smo-key/kaleidoscope#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "request": "^2.73.0"
+  }
 }
