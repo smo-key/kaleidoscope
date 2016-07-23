@@ -8,7 +8,9 @@
 <link rel="import" href="../lib/paper-listbox/paper-listbox.html">
 <link rel="import" href="../lib/paper-item/paper-item.html">
 <link rel="import" href="../lib/iron-icon/iron-icon.html">
+
 <link rel="import" href="mdi.html">
+<link rel="import" href="concept-search.html">
 
 <dom-module id="app-index">
   <template>
@@ -37,30 +39,10 @@
       {
         --paper-toolbar-background: rgba(0,0,0,0.2);
         font-family: 'Roboto', 'Noto', sans-serif;
-        z-index: 1;
+        z-index: 3;
       }
 
       /** CONTAINERS **/
-      div.main
-      {
-        display: block;
-        background-color: rgba(0, 0, 0, 0.6);
-      }
-      div.main.centered
-      {
-        display: flex;
-        text-align: left;
-        justify-content: center;
-        box-sizing: border-box;
-        align-items: center;
-        position: absolute;
-        top: 64px;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin-top: -64px;
-        overflow: hidden;
-      }
       div.bottom
       {
         position: absolute;
@@ -74,42 +56,6 @@
         box-sizing: border-box;
         align-items: flex-end;
       }
-
-      /** SEARCH **/
-      paper-input.search
-      {
-        margin-top: -24px;
-        --paper-input-container-input: {
-          font-size: 32px;
-          color: rgba(255, 255, 255, var(--light-primary-opacity));
-          padding-bottom: 6px;
-          font-weight: 500;
-          opacity: 1;
-          transition: opacity 1s;
-        };
-        --paper-input-container-color: rgba(255, 255, 255, var(--light-secondary-opacity));
-        --paper-input-container-focus-color: rgba(255, 255, 255, var(--light-primary-opacity));
-      }
-      paper-input.search iron-icon[prefix]
-      {
-        width: 42px;
-        height: 42px;
-        position: relative;
-        top: -2px;
-        margin-right: 8px;
-        margin-left: 6px;
-        color: rgba(255, 255, 255, var(--light-secondary-opacity));
-      }
-      paper-input.search paper-icon-button[suffix]
-      {
-        position: relative;
-        top: -2px;
-      }
-      paper-listbox#searchsuggest
-      {
-        display: none;
-      }
-
     </style>
 
     <paper-toolbar>
@@ -117,252 +63,14 @@
         <span class="title">Project Kaleidoscope</span>
       </div>
     </paper-toolbar>
-    <div class="main centered">
-      <div class="container">
-        <h2 style="text-align: center">Compare real world events to real people's reactions.</h2><br><br>
-
-        <h3 style="text-align: center">Enter any person, <span style="opacity:0.9">place, </span><span style="opacity:0.8">organization, </span><span style="opacity:0.7">or idea in the media.</span></h3>
-
-        <paper-input tabindex="1" id="search-main" class="search" placeholder=""><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
-
-        <p style="text-align:right;opacity:0.4" id="main-stat"></p>
-      </div>
-    </div>
-    <div class="bottom">
-      <div class="col-xs-4" style="text-align: left">
-        <p id="image-credit"></p>
-      </div>
-      <div class="col-xs-4" style="text-align: center">
-        <p>Website Copyright (C) Arthur Pachachura</p>
-      </div>
-      <div class="col-xs-4" style="text-align: right">
-
-      </div>
-    </div>
-
+    <concept-search></concept-search>
   </template>
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
   <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
   <script>
     Polymer({
-      is: 'app-index',
-      properties: {
-        prop1: {
-          type: String,
-          value: 'app-index',
-        },
-      },
-      ready: function() {
-        /** UTILITIES (WATER, GAS, ETC.) **/
-        function sleep(time) {
-          return new Promise((resolve) => setTimeout(resolve, time));
-        }
-        function shuffle(a) {
-          var j, x, i;
-          for (i = a.length; i; i--) {
-            j = Math.floor(Math.random() * i);
-            x = a[i - 1];
-            a[i - 1] = a[j];
-            a[j] = x;
-          }
-          return a;
-        }
-
-        /** PLACEHOLDER ANIMATION **/
-        var i = 0;
-        var searchSuggestTrending = [""];
-        var searchSuggestGet = false;
-        var searchSuggestIgnore = false;
-        var searchPrevValue = "";
-        function placeholderLoop()
-        {
-          sleep(1000).then(() => {
-            jQuery("#search-main").attr("placeholder", searchSuggestTrending[i++ % searchSuggestTrending.length]);
-            jQuery('paper-input.search:not([active="true"]) input').css("opacity", 1);
-            sleep(1000).then(() => {
-              sleep(2000).then(() => {
-                jQuery('paper-input.search:not([active="true"]) input').css("opacity", 0);
-                placeholderLoop();
-              });
-            });
-          })
-        }
-        $("paper-input.search input").css("opacity", 0);
-        $("paper-input.search input").css("transition", "opacity 1s");
-        //Handle keyup, keydown, and search
-        $("#search-main input").keydown(function(event) {
-          //Key up
-          if (event.which == 38) {
-            var selected = jQuery('#searchsuggest').prop("selected");
-            selected--;
-            if (selected < 0) { selected = 0; }
-            jQuery('#searchsuggest').prop("selected", selected);
-            jQuery("paper-item.searchsuggest").css("background-color", "inherit");
-            jQuery("paper-item.searchsuggest:nth-child(" + (selected + 1) + ")").css("background-color", "#e0e0e0");
-            event.preventDefault();
-          }
-          //Key down
-          if (event.which == 40) {
-            var selected = jQuery('#searchsuggest').prop("selected");
-            selected++;
-            var count = jQuery("#searchsuggest > paper-item").length - 1;
-            if (selected > count) { selected = count; }
-            jQuery("paper-item.searchsuggest").css("background-color", "inherit");
-            jQuery("paper-item.searchsuggest:nth-child(" + (selected + 1) + ")").css("background-color", "#e0e0e0");
-            jQuery('#searchsuggest').prop("selected", selected);
-            event.preventDefault();
-          }
-          //Key enter
-          if (event.which == 13) {
-            var suggestions = jQuery('#searchsuggest');
-            if (!suggestions.is(':visible'))
-            {
-              if (jQuery.trim(jQuery("#search-main input").val()).length > 0)
-              {
-                //Search now
-                console.log("Searching for " + jQuery("#search-main input").val());
-              }
-            }
-            else
-            {
-              //Activate search suggestions
-              searchSuggestIgnore = true;
-              jQuery('#searchsuggest paper-item:nth-child(' + (jQuery('#searchsuggest').prop("selected") + 1) + ')').click();
-            }
-
-            event.preventDefault();
-          }
-        });
-        //Handle change
-        $("paper-input.search input").on("change paste keyup", function(event)
-        {
-          //Make sure value actually changed
-          if (jQuery("paper-input.search input").val() !== searchPrevValue)
-          {
-            searchPrevValue = jQuery("paper-input.search input").val();
-
-            //Change blinking state
-            var empty = (jQuery("paper-input.search input").val().length === 0);
-            if (empty)
-            {
-              jQuery("paper-input.search input").css("transition", "opacity 1s");
-              jQuery('#searchsuggest').hide();
-              searchSuggestGet = false;
-            }
-            else {
-              if (searchSuggestIgnore)
-              {
-                searchSuggestIgnore = false;
-              }
-              else
-              {
-                jQuery("paper-input.search input").css("transition", "none");
-                searchSuggestGet = true;
-              }
-            }
-            jQuery("paper-input.search input").css("opacity", 1);
-            jQuery("paper-input.search").attr("active", !empty);
-          }
-        });
-        //Get search suggestions
-        window.setInterval(function(){
-          if (searchSuggestGet)
-          {
-            console.log("Getting suggestions for " + searchPrevValue);
-            searchSuggestGet = false;
-            var text = jQuery("paper-input.search input").val();
-            jQuery.get("http://eventregistry.org/json/suggestConcepts?prefix=" + encodeURIComponent(text) + "&lang=eng&source=concepts&source=conceptClass")
-            .done(function(data) {
-              data = JSON.parse(data);
-              jQuery('#searchsuggest').remove();
-              var html = "<paper-listbox id='searchsuggest' selected='0'>";
-              for (var i=0; i<((data.length > 5) ? 5 : data.length); i++)
-              {
-                var icon = 'mdi:tag';
-                if (data[i].type == "loc") icon = 'mdi:map-marker';
-                if (data[i].type == "person") icon = 'mdi:account';
-                if (data[i].type == "org") icon = 'mdi:account-multiple';
-
-                var text = "<paper-item tabindex='" + (i+2) + "'><iron-icon icon='" + icon + "'></iron-icon>"  + data[i].label.eng + "</paper-item>";
-                html += text;
-                searchSuggestGet = false;
-              }
-              html += "</paper-listbox>";
-              jQuery(html).insertAfter('#search-main');
-              jQuery("#searchsuggest paper-item").addClass("searchsuggest");
-              jQuery("#searchsuggest").css("position","relative");
-              jQuery("#searchsuggest").css("top","-8px");
-              jQuery("#searchsuggest").css("padding","4px 0px");
-              jQuery("#searchsuggest").css("z-index","2");
-              jQuery("#searchsuggest").css("opacity","0.9");
-              jQuery("paper-item.searchsuggest").css("margin-left", "0px");
-              jQuery("paper-item.searchsuggest").css("font-size", "14px");
-              jQuery("paper-item.searchsuggest").css("min-height", "0px");
-              jQuery("paper-item.searchsuggest").css("height", "32px");
-              jQuery("paper-item.searchsuggest iron-icon").css("margin-right", "16px");
-              //Handle click
-              jQuery("paper-item.searchsuggest").click(function()
-              {
-                jQuery('#searchsuggest').hide();
-                searchSuggestGet = false;
-                var string = jQuery.trim(jQuery(this).text());
-                jQuery('#search-main input').val(string);
-              });
-              jQuery('#searchsuggest').show();
-              jQuery("#searchsuggest paper-item.searchsuggest:nth-child(1)").select();
-              jQuery("paper-item.searchsuggest:nth-child(1)").css("background-color", "#e0e0e0");
-            })
-            .fail(function() {
-              console.warn("Failed to get concept search suggestions");
-              jQuery('#searchsuggest').hide();
-            });
-          }
-        }, 1200);
-
-        /** IMMEDIATE API CALLS **/
-        const server = "http://localhost:8001"
-        //Get usage stats
-        jQuery.get(server + "/api/1/stats/string")
-        .done(function(data) {
-          jQuery("#main-stat").html(data.statString);
-        })
-        .fail(function() {
-          console.warn("Failed to get stats data");
-        });
-        //Get trending suggestions
-        jQuery.get(server + "/api/1/trending/suggest")
-        .done(function(data) {
-          searchSuggestTrending = [ ];
-          for (var j=0; j<data.list.length; j+=6)
-          {
-            var sublist = data.list.slice(j, j+6);
-            sublist = shuffle(sublist);
-            searchSuggestTrending.push(sublist[0]);
-            searchSuggestTrending.push(sublist[1]);
-            searchSuggestTrending.push(sublist[2]);
-            searchSuggestTrending.push(sublist[3]);
-            searchSuggestTrending.push(sublist[4]);
-            searchSuggestTrending.push(sublist[5]);
-          }
-        })
-        .fail(function() {
-          console.warn("Failed to get trending suggestions");
-        })
-        .always(function() {
-          placeholderLoop();
-        });
-        //Get tranding image
-        jQuery.get(server + "/api/1/trending/images")
-        .done(function(data) {
-          var image = data.images[Math.floor(Math.random()*data.images.length)];
-          jQuery("#app-index").css("background-image", "url('" + image.url + "')");
-          jQuery("#image-credit").html("<strong><a style='color: rgba(255, 255, 255, 0.8)!important' href='" + image.articleUrl + "'>" + (image.caption.length > 0 ? image.caption : image.articleTitle)+ "</a></strong><br>Image credit: " + image.copyright);
-        })
-        .fail(function() {
-          console.warn("Failed to get trending image");
-        });
-      }
+      is: 'app-index'
     });
   </script>
 </dom-module>
