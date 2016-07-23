@@ -47,6 +47,7 @@
       /** PLACEHOLDER ANIMATION **/
       var i = 0;
       var searchSuggestTrending = [""];
+      var searchSuggestGet = false;
       function placeholderLoop()
       {
         sleep(1000).then(() => {
@@ -69,13 +70,42 @@
         if (empty)
         {
           $("paper-input.search input").css("transition", "opacity 1s");
+          searchSuggestGet = false;
         }
         else {
           $("paper-input.search input").css("transition", "none");
+          searchSuggestGet = true;
         }
         $("paper-input.search input").css("opacity", 1);
         $("paper-input.search").attr("active", !empty);
       });
+      //Get search suggestions
+      window.setInterval(function(){
+        if (searchSuggestGet)
+        {
+          searchSuggestGet = false;
+          var text = $("paper-input.search input").val();
+          $.get("http://eventregistry.org/json/suggestConcepts?prefix=" + encodeURIComponent(text) + "&lang=eng&source=concepts&source=conceptClass")
+          .done(function(data) {
+            data = JSON.parse(data);
+            var html = "";
+            for (var i=0; i<((data.length > 5) ? 5 : data.length); i++)
+            {
+              var icon = 'mdi:tag';
+              if (data[i].type == "loc") icon = 'mdi:map-marker';
+              if (data[i].type == "person") icon = 'mdi:account';
+              if (data[i].type == "org") icon = 'mdi:account-multiple';
+              html += "<paper-item><iron-icon icon='" + icon + "'></iron-icon>" + data[i].label.eng + "</paper-item>";
+            }
+            console.log(html);
+            $("#search-suggest").empty().append(html);
+          })
+          .fail(function() {
+            console.warn("Failed to get concept search suggestions");
+          });
+        }
+      }, 1200);
+
 
       /** IMMEDIATE API CALLS **/
       const server = "http://localhost:8001"
@@ -92,14 +122,16 @@
       .done(function(data) {
         console.log(data);
         searchSuggestTrending = [ ];
-        for (var j=0; j<data.list.length; j+=4)
+        for (var j=0; j<data.list.length; j+=6)
         {
-          var sublist = data.list.slice(j, j+4);
+          var sublist = data.list.slice(j, j+6);
           sublist = shuffle(sublist);
           searchSuggestTrending.push(sublist[0]);
           searchSuggestTrending.push(sublist[1]);
           searchSuggestTrending.push(sublist[2]);
           searchSuggestTrending.push(sublist[3]);
+          searchSuggestTrending.push(sublist[4]);
+          searchSuggestTrending.push(sublist[5]);
         }
       })
       .fail(function() {

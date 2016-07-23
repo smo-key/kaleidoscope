@@ -5,6 +5,8 @@
 <link rel="import" href="../lib/paper-button/paper-button.html">
 <link rel="import" href="../lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../lib/paper-progress/paper-progress.html">
+<link rel="import" href="../lib/paper-listbox/paper-listbox.html">
+<link rel="import" href="../lib/paper-item/paper-item.html">
 <link rel="import" href="../lib/iron-icon/iron-icon.html">
 <link rel="import" href="mdi.html">
 
@@ -73,7 +75,7 @@
         align-items: flex-end;
       }
 
-      /** INPUT **/
+      /** SEARCH **/
       paper-input.search
       {
         margin-top: -24px;
@@ -95,6 +97,7 @@
         position: relative;
         top: -2px;
         margin-right: 8px;
+        margin-left: 6px;
         color: rgba(255, 255, 255, var(--light-secondary-opacity));
       }
       paper-input.search paper-icon-button[suffix]
@@ -102,8 +105,23 @@
         position: relative;
         top: -2px;
       }
-
-      /** BUTTONS **/
+      paper-listbox#search-suggest
+      {
+        position: relative;
+        top: -8px;
+        padding: 4px 0px;
+      }
+      paper-listbox#search-suggest paper-item
+      {
+        margin-left: 0px;
+        font-size: 14px;
+        min-height: 0;
+        height: 32px;
+      }
+      paper-listbox#search-suggest paper-item iron-icon
+      {
+        margin-right: 16px;
+      }
 
     </style>
 
@@ -120,7 +138,10 @@
 
         <paper-input id="search-main" class="search" placeholder=""><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
 
-        <p style="text-align:right;opacity:0.4" id="main-stat">Searching over <strong>128,282,258</strong> articles from <strong>149,395</strong> news sources</p>
+        <paper-listbox id="search-suggest" selected="0">
+        </paper-listbox>
+
+        <p style="text-align:right;opacity:0.4" id="main-stat"></p>
       </div>
     </div>
     <div class="bottom">

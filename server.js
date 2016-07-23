@@ -43,38 +43,59 @@ function updateAllCache()
 }
 function updateTrending(cb)
 {
+	var skipCheck = false;
 	if (cache.trending === undefined) cache.trending = { };
-	if (cache.trending.suggest === undefined) cache.trending.suggest = { };
-	if (cache.trending.suggest.time === undefined) { cache.trending.suggest.time = time(new Date()) }
-	else if (cache.trending.suggest.time.diff(time(new Date()), 'seconds') > -60) { return; }
-	else {
+	if (cache.trending.suggest === undefined) cache.trending.suggest = { status: 500, error: null, list: [ ] };
+	if (cache.trending.suggest.time === undefined) { skipCheck = true; }
+	if (skipCheck || (cache.trending.suggest.time.diff(time(new Date()), 'seconds') <= (-60 * 30))) {
 		cache.trending.suggest.time = time(new Date());
-	}
+		cache.trending.suggest.list = [ ];
 
-	console.log("Updating trending data...");
+		console.log("Updating trending data...");
 
-	request('http://eventregistry.org/jsonCache/trends?action=getConceptTrendGroups&conceptType=wiki&conceptType=org&conceptType=person&conceptType=loc&conceptCount=5&conceptIncludeConceptImage=false&conceptIncludeConceptTrendingHistory=false&conceptLang=eng&maxCacheAge=0&source=news&type=concept', { jar: session }, function(error, response, body) {
-		if (error || response.statusCode != 200) {
-			console.error(body);
-			console.error(error);
-			cache.trending.suggest = { status: 500, error: error };
-			if (!error) cache.trending.suggest.error = response.body;
-			cb();
-		}
-		else {
-			var json = JSON.parse(body);
-			cache.trending.suggest = { status: 200, error: null, list: [ ]};
-			for (var i=0; i<json.wiki.trendingConcepts.length; i++)
-			{
-				cache.trending.suggest.list.push(json.person.trendingConcepts[i].label.eng);
-				cache.trending.suggest.list.push(json.org.trendingConcepts[i].label.eng);
-				cache.trending.suggest.list.push(json.loc.trendingConcepts[i].label.eng);
-				cache.trending.suggest.list.push(json.wiki.trendingConcepts[i].label.eng);
+		request('http://eventregistry.org/json/trends?action=getConceptTrendGroups&conceptType=wiki&conceptType=org&conceptType=person&conceptType=loc&conceptCount=5&conceptIncludeConceptImage=false&conceptIncludeConceptTrendingHistory=false&conceptLang=eng&source=news&type=concept', { jar: session }, function(error, response, body) {
+			if (error || response.statusCode != 200) {
+				console.error(body);
+				console.error(error);
+				cache.trending.suggest.status = 500;
+				cache.trending.suggest.error = error;
+				if (!error) cache.trending.suggest.error = response.body;
+				cb();
 			}
-			console.log("Trending data updated!");
-			cb();
-		}
-	});
+			else {
+				var json = JSON.parse(body);
+				request('http://eventregistry.org/json/suggestConcepts?prefix=&lang=eng&source=concepts&source=conceptClass', { jar: session }, function(error, response, body) {
+					if (error || response.statusCode != 200) {
+						console.error(body);
+						console.error(error);
+						cache.trending.suggest.status = 500;
+						cache.trending.suggest.error = error;
+						if (!error) cache.trending.suggest.error = response.body;
+						cb();
+					}
+					else {
+						var json2 = JSON.parse(body);
+						for (var i=0; i<json.wiki.trendingConcepts.length; i++)
+						{
+							cache.trending.suggest.list.push(json.person.trendingConcepts[i].label.eng);
+							cache.trending.suggest.list.push(json.org.trendingConcepts[i].label.eng);
+							cache.trending.suggest.list.push(json.loc.trendingConcepts[i].label.eng);
+							cache.trending.suggest.list.push(json.wiki.trendingConcepts[i].label.eng);
+							cache.trending.suggest.list.push(json2[(2*i) % json2.length].label.eng);
+							cache.trending.suggest.list.push(json2[((2*i)+1) % json2.length].label.eng);
+						}
+						cache.trending.suggest.status = 200;
+						console.log("Trending data updated!");
+						cb();
+					}
+				});
+			}
+		});
+	}
+	else {
+		console.log("Trend update ignored.");
+		cb();
+	}
 }
 
 /** PUBLIC API **/
@@ -149,6 +170,8 @@ app.get('/api/1/trending/images', function(req, res) {
         else {
           var json2 = JSON.parse(body2);
           var im2 = parseTrendingImages(json2, out);
+
+					//"http://eventregistry.org/json/suggestConcepts?prefix=" + encodeURIComponent(text) + "&lang=eng&source=concepts&source=conceptClass"
 
           request('https://api.nytimes.com/svc/topstories/v2/national.json?apikey=***REMOVED***', function(error, response, body3) {
             if (error || response.statusCode != 200) {
