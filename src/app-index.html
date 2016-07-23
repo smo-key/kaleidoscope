@@ -11,6 +11,7 @@
 
 <link rel="import" href="mdi.html">
 <link rel="import" href="concept-search.html">
+<link rel="import" href="article-list.html">
 
 <dom-module id="app-index">
   <template>
@@ -34,14 +35,6 @@
         font-weight: 300;
       }
 
-      /** TOOLBAR **/
-      paper-toolbar
-      {
-        --paper-toolbar-background: rgba(0,0,0,0.2);
-        font-family: 'Roboto', 'Noto', sans-serif;
-        z-index: 3;
-      }
-
       /** CONTAINERS **/
       div.bottom
       {
@@ -58,12 +51,8 @@
       }
     </style>
 
-    <paper-toolbar>
-      <div class="container">
-        <span class="title">Project Kaleidoscope</span>
-      </div>
-    </paper-toolbar>
-    <concept-search></concept-search>
+
+    <article-list></article-list>
   </template>
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
