@@ -23,6 +23,7 @@ exports.updateTrending = function(session, cb)
 	if (skipCheck || (cache.trending.suggest.time.diff(time(new Date()), 'seconds') <= (-60 * 30))) {
 		cache.trending.suggest.time = time(new Date());
 		cache.trending.suggest.list = [ ];
+    console.log("Updating trending suggestions...");
 
 		request('http://eventregistry.org/json/trends?action=getConceptTrendGroups&conceptType=wiki&conceptType=org&conceptType=person&conceptType=loc&conceptCount=5&conceptIncludeConceptImage=false&conceptIncludeConceptTrendingHistory=false&conceptLang=eng&source=news&type=concept', { jar: session }, function(error, response, body) {
 			if (error || response.statusCode != 200) {
@@ -97,6 +98,7 @@ exports.updateTrendingImages = function(session, cb)
 	if (cache.trending.images === undefined) cache.trending.images = { status: 500, error: null, images: [ ] };
 	if ((cache.trending.images.time === undefined) || (cache.trending.images.time.diff(time(new Date()), 'seconds') <= (-60 * 30))) {
     cache.trending.images.time = time(new Date());
+    console.log("Updating trending images...");
 
 	  request('https://api.nytimes.com/svc/topstories/v2/home.json?apikey=***REMOVED***', function(error, response, body1) {
 	    if (error || response.statusCode != 200) {
@@ -155,6 +157,7 @@ exports.updateStatsString = function(session, cb)
 	if (cache.stats.string === undefined) cache.stats.string = { status: 500, error: null, statString: "" };
 	if ((cache.stats.string.time === undefined) || (cache.stats.string.time.diff(time(new Date()), 'seconds') <= (-60 * 30))) {
     cache.stats.string.time = time(new Date());
+    console.log("Updating stats string...");
 
     request('http://eventregistry.org/jsonCache/overview?action=getRecentStats&maxCacheAge=10', function(error, response, body) {
       if (error || response.statusCode != 200) {
