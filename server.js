@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var request = require('request');
 var cache = require("./server_cache.js");
+var now = require("./server_now.js");
 
 /** DEBUGGING **/
 const debug = true;
@@ -59,7 +60,7 @@ app.get('/api/1/stats/string', function(req, res) {
 
 app.get('/api/1/events', function(req, res) {
   if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
-  console.log("Get event list for: " + req.query.uri);
+  console.log("Get event list for: " + req.query.q + " (" + req.query.uri + ")");
   now.getEvents(session, req.query.uri, function(data)
   {
     var status = data.status;

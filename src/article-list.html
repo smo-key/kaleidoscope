@@ -179,6 +179,7 @@
   <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
   <script>
     var suggestPrevValue = "";
+    const server = "http://localhost:8001"
 
     Polymer({
       is: 'article-list',
@@ -300,7 +301,6 @@
         }, 1200);
 
         /** IMMEDIATE API CALLS **/
-        const server = "http://localhost:8001"
         //Get trending suggestions
         jQuery.get(server + "/api/1/trending/suggest")
         .done(function(data) {
@@ -389,6 +389,13 @@
       searchUriChanged: function(uri, oldUri)
       {
         console.log(uri);
+        jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri)
+        .done(function(data) {
+          console.log(data);
+        })
+        .fail(function() {
+          console.warn("Failed to get trending suggestions");
+        });
         //next: setup dom-repeat on array
       },
     });
