@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/smo-key/kaleidoscope#readme",
   "dependencies": {
-    "async": "^2.0.0",
+    "async": "^2.0.1",
     "express": "^4.14.0",
     "moment": "^2.14.1",
     "request": "^2.73.0"

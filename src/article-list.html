@@ -9,6 +9,7 @@
 <link rel="import" href="../lib/paper-spinner/paper-spinner.html">
 <link rel="import" href="../lib/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../lib/paper-listbox/paper-listbox.html">
+<link rel="import" href="../lib/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../lib/paper-item/paper-item.html">
 <link rel="import" href="../lib/iron-icon/iron-icon.html">
 
@@ -42,6 +43,23 @@
         --paper-toolbar-background: var(--paper-purple-500);
         font-family: 'Roboto', 'Noto', sans-serif;
         z-index: 3;
+      }
+      paper-toolbar paper-button
+      {
+        float: right;
+        text-transform: none;
+        padding: 12px 12px 11px 12px;
+      }
+      paper-toolbar paper-button iron-icon
+      {
+        margin-right: 6px;
+        width: 24px;
+        height: 24px;
+      }
+      paper-toolbar .title
+      {
+        position: relative;
+        top: 12px;
       }
 
       /** CONTAINERS **/
@@ -139,7 +157,15 @@
 
     <paper-toolbar>
       <div class="container">
-        <span class="title">Project Kaleidoscope<span class="subtitle"></span>
+        <span class="title">Project Kaleidoscope</span>
+        <paper-button><iron-icon icon="mdi:earth"></iron-icon>English</paper-button>
+        <!-- <paper-listbox class="languages">
+          <paper-item code="eng">English</paper-item>
+          <paper-item code="deu">Deutsch</paper-item>
+          <paper-item code="esp">Español</paper-item>
+          <paper-item code="cat">Catalàn</paper-item>
+          <paper-item code="eng">Madeleine</paper-item>
+        </paper-listbox> -->
       </div>
     </paper-toolbar>
     <div class="main">
@@ -385,12 +411,12 @@
       searchUriChanged: function(uri, oldUri)
       {
         console.log(uri);
-        jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri)
+        jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri + "&lang=eng")
         .done(function(data) {
           console.log(data);
         })
         .fail(function() {
-          console.warn("Failed to get trending suggestions");
+          console.warn("Failed to get events for query '" + this.search + "'");
         });
         //next: setup dom-repeat on array
       },

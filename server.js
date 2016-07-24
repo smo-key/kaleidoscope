@@ -61,7 +61,7 @@ app.get('/api/1/stats/string', function(req, res) {
 app.get('/api/1/events', function(req, res) {
   if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
   console.log("Get event list for: " + req.query.q + " (" + req.query.uri + ")");
-  now.getEvents(session, req.query.uri, function(data)
+  now.getEvents(session, req.query.uri, req.query.lang || "eng", function(data)
   {
     var status = data.status;
     delete data.status;
