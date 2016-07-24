@@ -174,11 +174,9 @@
         <paper-input active="true" on-keydown="onSearchKeypress" id="search-main" class="search" placeholder="" value="{{search}}"><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
 
         <div class="row" id="events">
-          <paper-event image="https://cdn.rt.com/files/2016.07/article/578fe4f4c3618869348b4567.jpg" title="Turkey coup: What does the state of emergency mean?" description="A state of emergency will be introduced in Turkey for three months following a coup attempt last week, President Recep Tayyip Erdogan announced on Wednesday.A state of emergency will be introduced in Turkey for three months following a coup attempt last week, President Recep Tayyip Erdogan announced on Wednesday." date="2 days ago" location="Turkey" hotness="40" article-count="731"></paper-event>
-          <paper-event image="http://i2.cdn.turner.com/money/dam/assets/160715174425-turkish-coup-facetime-540x304.jpg" title="Turkey's beleaguered president addresses country on FaceTime" description="Turkey's president resorted to FaceTime in an attempt to rally people against a military coup." date="2 days ago" location="Ankara, Turkey" hotness="60" article-count="155"></paper-event>
-          <paper-event image="http://i2.cdn.turner.com/money/dam/assets/160715174425-turkish-coup-facetime-540x304.jpg" title="Turkey's beleaguered president addresses country on FaceTime" description="Turkey's president resorted to FaceTime in an attempt to rally people against a military coup." date="2 days ago" location="Ankara, Turkey" hotness="60" article-count="155"></paper-event>
-          <paper-event image="http://i2.cdn.turner.com/money/dam/assets/160715174425-turkish-coup-facetime-540x304.jpg" title="Turkey's beleaguered president addresses country on FaceTime" description="Turkey's president resorted to FaceTime in an attempt to rally people against a military coup." date="2 days ago" location="Ankara, Turkey" hotness="60" article-count="155"></paper-event>
-          <paper-event image="http://i2.cdn.turner.com/money/dam/assets/160715174425-turkish-coup-facetime-540x304.jpg" title="Turkey's beleaguered president addresses country on FaceTime" description="Turkey's president resorted to FaceTime in an attempt to rally people against a military coup." date="2 days ago" location="Ankara, Turkey" hotness="60" article-count="155"></paper-event>
+          <template is="dom-repeat" items="{{events}}">
+            <paper-event image="{{item.image}}" title="{{item.title}}" description="{{item.summary}}" date="{{item.time}}" location="{{item.location}}" hotness="{{item.hotness}}" article-count="{{item.articlesTotal}}"></paper-event>
+          </template>
         </div>
       </div>
     </div>
@@ -220,6 +218,7 @@
       ready: function() {
         /** IMPORTANT DOM THINGS **/
         suggestPrevValue = this.search;
+        this.events = [ ];
 
         /** UTILITIES (WATER, GAS, ETC.) **/
         function sleep(time) {
@@ -378,7 +377,7 @@
             {
               //Search now
               console.log("Searching for " + jQuery("#search-main input").val());
-              this.conceptUri = jQuery("#search-main input").attr("uri");
+              this.set("searchUri", jQuery("#search-main input").attr("uri"));
             }
           }
           else
@@ -408,17 +407,17 @@
           jQuery("paper-input.search").attr("active", !empty);
         }
       },
-      searchUriChanged: function(uri, oldUri)
+      searchUriChanged: function(uri)
       {
-        console.log(uri);
+        console.log("Getting events for " + uri);
+        var t = this;
         jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri + "&lang=eng")
         .done(function(data) {
-          console.log(data);
+          t.set('events', data.events);
         })
         .fail(function() {
           console.warn("Failed to get events for query '" + this.search + "'");
         });
-        //next: setup dom-repeat on array
       },
     });
   </script>
