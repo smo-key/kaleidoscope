@@ -145,7 +145,7 @@
     <div class="main">
       <div class="container">
         <br>
-        <paper-input on-keydown="onSearchKeypress" id="search-main" class="search" placeholder=""><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
+        <paper-input active="true" on-keydown="onSearchKeypress" id="search-main" class="search" placeholder="" value="{{search}}"><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
 
         <div id="events">
           <div class="row">
@@ -182,22 +182,37 @@
 
     Polymer({
       is: 'article-list',
+      properties:
+      {
+        search: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+        searchUri: {
+          type: String,
+          observer: "searchUriChanged"
+        }
+      },
       ready: function() {
+        /** IMPORTANT DOM THINGS **/
+        suggestPrevValue = this.search;
 
         /** UTILITIES (WATER, GAS, ETC.) **/
         function sleep(time) {
           return new Promise((resolve) => setTimeout(resolve, time));
         }
         function shuffle(a) {
-          var j, x, i;
-          for (i = a.length; i; i--) {
-            j = Math.floor(Math.random() * i);
-            x = a[i - 1];
-            a[i - 1] = a[j];
-            a[j] = x;
-          }
-          return a;
-        }
+           var j, x, i;
+           for (i = a.length; i; i--) {
+             j = Math.floor(Math.random() * i);
+             x = a[i - 1];
+             a[i - 1] = a[j];
+             a[j] = x;
+           }
+           return a;
+         }
+
 
         /** SEARCH BOX **/
         var i = 0;
@@ -215,8 +230,8 @@
             });
           })
         }
-        $("paper-input.search input").css("opacity", 0);
-        $("paper-input.search input").css("transition", "opacity 1s");
+        $("paper-input.search input").css("transition", "none");
+        $("paper-input.search").css("opacity", "1");
 
         //Get search suggestions
         window.setInterval(function(){
@@ -230,6 +245,7 @@
             jQuery.get("http://eventregistry.org/json/suggestConcepts?prefix=" + encodeURIComponent(text) + "&lang=eng&source=concepts&source=conceptClass")
             .done(function(data) {
               data = JSON.parse(data);
+              console.log(data);
               jQuery('#searchsuggest').remove();
               var html = "<paper-listbox id='searchsuggest' selected='0'>";
               for (var i=0; i<((data.length > 5) ? 5 : data.length); i++)
@@ -239,7 +255,7 @@
                 if (data[i].type == "person") icon = 'mdi:account';
                 if (data[i].type == "org") icon = 'mdi:account-multiple';
 
-                var text = "<paper-item tabindex='" + (i+2) + "'><iron-icon icon='" + icon + "'></iron-icon>"  + data[i].label.eng + "</paper-item>";
+                var text = "<paper-item uri='" + data[i].uri + "'tabindex='" + (i+2) + "'><iron-icon icon='" + icon + "'></iron-icon>"  + data[i].label.eng + "</paper-item>";
                 html += text;
               }
               if (data.length == 0)
@@ -265,8 +281,10 @@
               {
                 jQuery('#searchsuggest').hide();
                 var string = jQuery.trim(jQuery(this).text());
+                var uri = jQuery(this).attr("uri");
                 suggestPrevValue = string;
                 jQuery('#search-main input').val(string);
+                jQuery('#search-main input').attr("uri", uri);
               });
               $("#search-main paper-spinner-lite").hide();
               jQuery('#searchsuggest').show();
@@ -338,6 +356,7 @@
             {
               //Search now
               console.log("Searching for " + jQuery("#search-main input").val());
+              this.conceptUri = jQuery("#search-main input").attr("uri");
             }
           }
           else
@@ -366,7 +385,12 @@
           jQuery("paper-input.search input").css("opacity", 1);
           jQuery("paper-input.search").attr("active", !empty);
         }
-      }
+      },
+      searchUriChanged: function(uri, oldUri)
+      {
+        console.log(uri);
+        //next: setup dom-repeat on array
+      },
     });
   </script>
 </dom-module>

@@ -57,6 +57,17 @@ app.get('/api/1/stats/string', function(req, res) {
 	});
 });
 
+app.get('/api/1/events', function(req, res) {
+  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  console.log("Get event list for: " + req.query.uri);
+  now.getEvents(session, req.query.uri, function(data)
+  {
+    var status = data.status;
+    delete data.status;
+    res.status(status).json(data);
+  });
+});
+
 /** LISTEN **/
 app.listen(8001, function () {
   console.log('Listening on port 8001!');
