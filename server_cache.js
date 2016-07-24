@@ -110,7 +110,7 @@ exports.updateTrendingImages = function(session, cb)
 	    else {
 	      var json1 = JSON.parse(body1);
 				cache.trending.copyright = json1.copyright;
-				cache.trending.images = [ ];
+				cache.trending.images.images = [ ];
 	      var im1 = parseTrendingImages(json1);
 
 	      request('https://api.nytimes.com/svc/topstories/v2/world.json?apikey=***REMOVED***', function(error, response, body2) {

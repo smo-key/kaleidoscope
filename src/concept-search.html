@@ -24,9 +24,11 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: transparent;
         color: #fff;
         font-family: 'Roboto', 'Noto', sans-serif;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
       }
       h1, h2, h3, h4, h5
       {
@@ -114,7 +116,7 @@
         position: absolute;
         top: 4px;
         left: 11px;
-        --paper-spinner-stroke-width: 4px;
+        --paper-spinner-stroke-width: 3px;
         --paper-spinner-layer-3-color: var(--paper-purple-500);
       }
       paper-input.search paper-icon-button[suffix]
@@ -153,7 +155,7 @@
         <p>Website Copyright (C) Arthur Pachachura</p>
       </div>
       <div class="col-xs-4" style="text-align: right">
-        <p>Article aggregation provided by <a class="white" href="https://eventregistry.org">EventRegistry</a></o>
+        <p>Article aggregation powered by <a class="white" href="https://eventregistry.org">EventRegistry</a></o>
       </div>
     </div>
 
@@ -300,7 +302,7 @@
         jQuery.get(server + "/api/1/trending/images")
         .done(function(data) {
           var image = data.images[Math.floor(Math.random()*data.images.length)];
-          jQuery("#app-index").css("background-image", "url('" + image.url + "')");
+          jQuery("#concept-search").css("background-image", "url('" + image.url + "')");
           jQuery("#image-credit").html("<strong><a style='color: rgba(255, 255, 255, 0.8)!important' href='" + image.articleUrl + "'>" + (image.caption.length > 0 ? image.caption : image.articleTitle)+ "</a></strong><br>Image credit: " + image.copyright);
         })
         .fail(function() {

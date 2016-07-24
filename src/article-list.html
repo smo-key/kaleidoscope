@@ -21,11 +21,6 @@
         display: block;
         margin: 0;
         padding: 0;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
         background: var(--paper-grey-50);
         color: #fff;
         font-family: 'Roboto', 'Noto', sans-serif;
@@ -77,6 +72,7 @@
         justify-content: center;
         box-sizing: border-box;
         align-items: flex-end;
+        padding-bottom: 9px;
       }
       div.bottom a
       {
@@ -116,7 +112,7 @@
         position: absolute;
         top: 4px;
         left: 11px;
-        --paper-spinner-stroke-width: 4px;
+        --paper-spinner-stroke-width: 3px;
         --paper-spinner-layer-3-color: var(--paper-purple-500);
       }
       paper-input.search paper-icon-button[suffix]
@@ -143,7 +139,7 @@
       @media (min-width: 992px) {
         paper-card.event
         {
-          width: 31%;
+          width: 31.3%;
         }
       }
       paper-card.event:hover
@@ -252,72 +248,8 @@
       <div class="container">
         <br>
         <paper-input on-keydown="onSearchKeypress" id="search-main" class="search" placeholder=""><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner active prefix hidden></paper-spinner><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
-        <br>
 
         <div class="row" id="events">
-          <paper-card class="event col-md-4 col-xs-6">
-            <div class="card-image" style="background-image: url('https://cdn.rt.com/files/2016.07/article/578fe4f4c3618869348b4567.jpg')">
-              <div class="card-heading">
-                <div class="card-heading-container">
-                  Turkey coup: What does the state of emergency mean?
-                  <br>
-                  <div class="subtitle">
-                    <span style='float:left'>2 days ago</span>
-                    <span style='float:right'><iron-icon icon="mdi:map-marker"></iron-icon>Turkey</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card-content">
-              A state of emergency will be introduced in Turkey for three months following a coup attempt last week, President Recep Tayyip Erdogan announced on Wednesday.
-            </div>
-            <div class="card-actions">
-              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="60"></paper-progress></span>
-              <span class="count"><strong>2,038</strong> articles</span>
-            </div>
-          </paper-card>
-          <paper-card class="event col-md-4 col-xs-6">
-            <div class="card-image" style="background-image: url('https://cdn.rt.com/files/2016.07/article/578fe4f4c3618869348b4567.jpg')">
-              <div class="card-heading">
-                <div class="card-heading-container">
-                  Turkey coup: What does the state of emergency mean?
-                  <br>
-                  <div class="subtitle">
-                    <span style='float:left'>2 days ago</span>
-                    <span style='float:right'><iron-icon icon="mdi:map-marker"></iron-icon>Turkey</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card-content">
-              A state of emergency will be introduced in Turkey for three months following a coup attempt last week, President Recep Tayyip Erdogan announced on Wednesday.
-            </div>
-            <div class="card-actions">
-              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="60"></paper-progress></span>
-              <span class="count"><strong>2,038</strong> articles</span>
-            </div>
-          </paper-card>
-          <paper-card class="event col-md-4 col-xs-6">
-            <div class="card-image" style="background-image: url('https://cdn.rt.com/files/2016.07/article/578fe4f4c3618869348b4567.jpg')">
-              <div class="card-heading">
-                <div class="card-heading-container">
-                  Turkey coup: What does the state of emergency mean?
-                  <br>
-                  <div class="subtitle">
-                    <span style='float:left'>2 days ago</span>
-                    <span style='float:right'><iron-icon icon="mdi:map-marker"></iron-icon>Turkey</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card-content">
-              A state of emergency will be introduced in Turkey for three months following a coup attempt last week, President Recep Tayyip Erdogan announced on Wednesday.
-            </div>
-            <div class="card-actions">
-              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="60"></paper-progress></span>
-              <span class="count"><strong>2,038</strong> articles</span>
-            </div>
-          </paper-card>
           <paper-card class="event col-md-4 col-xs-6">
             <div class="card-image" style="background-image: url('https://cdn.rt.com/files/2016.07/article/578fe4f4c3618869348b4567.jpg')">
               <div class="card-heading">
@@ -352,7 +284,7 @@
         <p>Website Copyright (C) Arthur Pachachura</p>
       </div>
       <div class="col-xs-4" style="text-align: right">
-        <p>Article aggregation provided by <a class="white" href="https://eventregistry.org">EventRegistry</a></o>
+        <p>Article aggregation powered by <a class="white" href="https://eventregistry.org">EventRegistry</a></o>
       </div>
     </div>
 
