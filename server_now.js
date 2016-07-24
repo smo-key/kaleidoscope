@@ -55,7 +55,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
         eventout.languages = event.articleCounts.length;
         for(key in event.articleCounts) {
           if(event.articleCounts.hasOwnProperty(key)) {
-          eventout.articlesTotal += event.articleCounts[key];
+            eventout.articlesTotal += event.articleCounts[key];
           }
         }
 
@@ -66,7 +66,6 @@ exports.getEvents = function(session, conceptUri, lang, cb)
         var recencyFactor = 10.2273515 / ((timeDiffHours)^(0.5494897));
         var relevanceFactor = searchRelevance / maxRelevance;
         var socialFactor = 0.00772985 * ((socialScore)^(0.787861));
-        console.log("Hours: " + timeDiffHours + " RecencyF: " + recencyFactor + " Soc:" + socialScore + " SocF: " + socialFactor);
         var newsFactor = 0.00772985 * ((eventout.articlesLang)^(0.787861));
 
         eventout.hotness = 25 * recencyFactor * (socialFactor + newsFactor);
