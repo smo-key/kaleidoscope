@@ -11,7 +11,9 @@
 <link rel="import" href="../lib/paper-listbox/paper-listbox.html">
 <link rel="import" href="../lib/paper-item/paper-item.html">
 <link rel="import" href="../lib/iron-icon/iron-icon.html">
+
 <link rel="import" href="mdi.html">
+<link rel="import" href="paper-event.html">
 
 <dom-module id="article-list">
   <template>
@@ -104,7 +106,6 @@
         margin-left: 6px;
         color: var(--paper-purple-500);
       }
-      paper-input.search paper-spinner[prefix],
       paper-input.search paper-spinner-lite[prefix]
       {
         width: 23px;
@@ -112,8 +113,8 @@
         position: absolute;
         top: 4px;
         left: 11px;
-        --paper-spinner-stroke-width: 3px;
-        --paper-spinner-layer-3-color: var(--paper-purple-500);
+        --paper-spinner-stroke-width: 4px;
+        --paper-spinner-color: var(--paper-grey-400);
       }
       paper-input.search paper-icon-button[suffix]
       {
@@ -126,117 +127,6 @@
         display: none;
       }
 
-      /** EVENTS **/
-      paper-card.event
-      {
-        color: #000;
-        padding: 0;
-        cursor: pointer;
-        transition: box-shadow 0.4s;
-        margin: 1% 1%;
-        width: 48%;
-      }
-      @media (min-width: 992px) {
-        paper-card.event
-        {
-          width: 31.3%;
-        }
-      }
-      paper-card.event:hover
-      {
-        box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
-                  0 1px 18px 0 rgba(0, 0, 0, 0.12),
-                  0 3px 5px -1px rgba(0, 0, 0, 0.4);
-      }
-      paper-card.event .card-image
-      {
-        background-position: center;
-        background-size: cover;
-        background-repeat: no-repeat;
-        min-height: 180px;
-      }
-      paper-card.event .card-image .card-heading
-      {
-        background: -moz-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 60%);
-        background: -webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 100%);
-        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 60%);
-        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#a6000000',GradientType=0 );
-
-        top: 0px;
-        height: 180px;
-        color: #fff;
-        font-size: 22px;
-        position: relative;
-        display: flex;
-        justify-content: flex-end;
-        box-sizing: border-box;
-        align-items: flex-end;
-        padding: 12px 16px;
-      }
-      paper-card.event .card-heading .subtitle
-      {
-        font-size: 12px;
-        display: block;
-        width: 100%;
-        margin-top: 6px;
-      }
-      paper-card.event .card-heading .subtitle iron-icon
-      {
-        height: 16px;
-        width: 16px;
-        margin-right: 2px;
-        position: relative;
-        top: -1px;
-      }
-      paper-card.event .card-content
-      {
-        color: var(--paper-grey-700);
-      }
-      paper-card.event .card-actions
-      {
-        font-size: 14px;
-        padding: 8px 12px;
-        margin-bottom: 24px;
-      }
-      paper-card.event .card-actions iron-icon
-      {
-        width: 22px;
-        height: 22px;
-        position: relative;
-        top: 1px;
-        margin-right: 4px;
-      }
-      paper-card.event .card-actions .hotness
-      {
-        color: var(--paper-red-500);
-        float: left;
-      }
-      paper-card.event .card-actions .hotness paper-progress
-      {
-        min-width: 0;
-        width: 100px;
-        display: inline-block;
-        --paper-progress-active-color: var(--paper-red-500);
-      }
-      paper-card.event .card-actions .count
-      {
-        color: var(--paper-grey-900);
-        float: right;
-        position: relative;
-        top: 3px;
-      }
-      paper-card.event .card-actions .count iron-icon
-      {
-        width: 20px;
-        height: 20px;
-        position: relative;
-        top: 0px;
-      }
-      paper-card.event .card-actions .count iron-icon.articlecount
-      {
-        margin-left: 4px;
-      }
-
     </style>
 
     <paper-toolbar>
@@ -247,30 +137,10 @@
     <div class="main">
       <div class="container">
         <br>
-        <paper-input on-keydown="onSearchKeypress" id="search-main" class="search" placeholder=""><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner active prefix hidden></paper-spinner><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
+        <paper-input on-keydown="onSearchKeypress" id="search-main" class="search" placeholder=""><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
 
         <div class="row" id="events">
-          <paper-card class="event col-md-4 col-xs-6">
-            <div class="card-image" style="background-image: url('https://cdn.rt.com/files/2016.07/article/578fe4f4c3618869348b4567.jpg')">
-              <div class="card-heading">
-                <div class="card-heading-container">
-                  Turkey coup: What does the state of emergency mean?
-                  <br>
-                  <div class="subtitle">
-                    <span style='float:left'>2 days ago</span>
-                    <span style='float:right'><iron-icon icon="mdi:map-marker"></iron-icon>Turkey</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card-content">
-              A state of emergency will be introduced in Turkey for three months following a coup attempt last week, President Recep Tayyip Erdogan announced on Wednesday.
-            </div>
-            <div class="card-actions">
-              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="60"></paper-progress></span>
-              <span class="count"><strong>2,038</strong> articles</span>
-            </div>
-          </paper-card>
+          <paper-event image="https://cdn.rt.com/files/2016.07/article/578fe4f4c3618869348b4567.jpg" title="Turkey coup: What does the state of emergency mean?" description="A state of emergency will be introduced in Turkey for three months following a coup attempt last week, President Recep Tayyip Erdogan announced on Wednesday." date="2 days ago" location="Turkey" hotness="40" article-count="731"></paper-event>
         </div>
 
       </div>
@@ -383,7 +253,7 @@
                 suggestPrevValue = string;
                 jQuery('#search-main input').val(string);
               });
-              $("#search-main paper-spinner").hide();
+              $("#search-main paper-spinner-lite").hide();
               jQuery('#searchsuggest').show();
               jQuery("#searchsuggest paper-item.searchsuggest:nth-child(1)").select();
               jQuery("paper-item.searchsuggest:nth-child(1)").css("background-color", "#e0e0e0");
@@ -391,7 +261,7 @@
             .fail(function() {
               console.warn("Failed to get concept search suggestions");
               jQuery('#searchsuggest').hide();
-              $("#search-main paper-spinner").prop("hidden", true);
+              $("#search-main paper-spinner-lite").prop("hidden", true);
             });
           }
         }, 1200);
@@ -474,8 +344,8 @@
             jQuery('#searchsuggest').hide();
           }
           else {
-            $("#search-main paper-spinner").prop("hidden", false);
-            $("#search-main paper-spinner").show();
+            $("#search-main paper-spinner-lite").prop("hidden", false);
+            $("#search-main paper-spinner-lite").show();
             jQuery("paper-input.search input").css("transition", "none");
           }
           jQuery("paper-input.search input").css("opacity", 1);
