@@ -4,6 +4,7 @@
 <link rel="import" href="../lib/paper-card/paper-card.html">
 <link rel="import" href="../lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../lib/paper-progress/paper-progress.html">
+<link rel="import" href="../lib/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../lib/iron-icon/iron-icon.html">
 <link rel="import" href="mdi.html">
 
@@ -41,11 +42,6 @@
       }
       .card-image .card-heading
       {
-        background: -moz-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 40%);
-        background: -webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 100%);
-        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 40%);
-        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#a6000000',GradientType=0 );
-
         top: 0px;
         height: 180px;
         color: #fff;
@@ -56,6 +52,10 @@
         box-sizing: border-box;
         align-items: flex-end;
         padding: 12px 16px;
+      }
+      .card-image .card-heading.shadow
+      {
+
       }
       .card-heading .subtitle
       {
@@ -123,8 +123,8 @@
     </style>
 
     <paper-card>
-      <div class="card-image" style="background-image: url('[[image]]')">
-        <div class="card-heading">
+      <div class="card-image" style="background-color: {{randomColor()}}; background-image: url('[[image]]')">
+        <div class="card-heading" style="{{imageClass(image)}}">
           <div class="card-heading-container">
             [[title]]
             <br>
@@ -139,9 +139,10 @@
         [[description]]
       </div>
       <div class="card-actions">
-        <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="[[hotness]]"></paper-progress></span>
+        <span id="hotness" class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="[[hotness]]"></paper-progress></span>
         <span class="count"><strong>[[articleCount]]</strong> articles</span>
       </div>
+      <paper-tooltip for="hotness" position="right">Article Hotness<br><span style="font-size:90%">(based on social shares, article count, and recency)</span></paper-tooltip>
     </paper-card>
   </template>
 
@@ -156,6 +157,15 @@
         description: String,
         hotness: Number,
         articleCount: String
+      },
+      imageClass: function(image)
+      {
+        return (image.length > 0) ? "background:-moz-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 40%);background:-webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 100%);background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 40%);filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#a6000000',GradientType=0 );" : "";
+      },
+      randomColor: function()
+      {
+        var colors = [ "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#009688", "#43A047", "#039BE5", "#0097A7", "#EF6C00"];
+        return colors[Math.floor(Math.random()*colors.length)];
       }
     });
   </script>
