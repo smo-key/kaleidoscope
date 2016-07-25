@@ -6,7 +6,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
 {
   //&dateStart=2016-07-09 <- for recent hits only
   /**For the most part, getting first 50 articles by relevance is pretty good - however, for larger items, also get the most *recent* articles **/
-  request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount=200&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=rel&eventsPage=1', { jar: session }, function(error, response, body) {
+  request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount=50&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=rel&eventsPage=1', { jar: session }, function(error, response, body) {
     var out = { status: 500, error: undefined, events: [ ]};
     if (error || JSON.parse(body).error !== undefined) {
       console.error(body);
@@ -40,7 +40,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
           if (event.location === undefined || event.location == null || event.location.length == 0) { eventout.location = "" }
           else {
             eventout.location = event.location.label[lang] || event.location.label["eng"] || "";
-            if (event.location.country !== undefined) eventout.location += ", " + (event.location.country.label[lang] || event.location.country.label["eng"] || "");
+            if (event.location.country !== undefined && event.location.country != null) eventout.location += ", " + (event.location.country.label[lang] || event.location.country.label["eng"] || "");
           }
           eventout.time = moment(event.eventDate, "YYYY-MM-DD").fromNow();
           eventout.image = event.images[0] || null;

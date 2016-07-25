@@ -184,7 +184,7 @@
     <div class="main">
       <div class="container">
         <br>
-        <paper-input active="true" on-keydown="onSearchKeypress" id="search-main" class="search" placeholder="" value="{{search}}"><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden ></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
+        <paper-input active="true" on-keydown="onSearchKeypress" id="search-event" class="search" placeholder="" value="{{search}}"><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden ></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
         <paper-progress hidden class="loading" indeterminate></paper-progress>
 
         <div class="row" id="events">
@@ -222,11 +222,11 @@
       {
         search: {
           type: String,
-          notify: true,
-          reflectToAttribute: true
+          notify: true
         },
         searchUri: {
           type: String,
+          notify: true,
           observer: "searchUriChanged"
         }
       },
@@ -256,7 +256,7 @@
         function placeholderLoop()
         {
           sleep(1000).then(() => {
-            jQuery("#search-main").attr("placeholder", searchSuggestTrending[i++ % searchSuggestTrending.length]);
+            jQuery("#search-event").attr("placeholder", searchSuggestTrending[i++ % searchSuggestTrending.length]);
             jQuery('paper-input.search:not([active="true"]) input').css("opacity", 1);
             sleep(1000).then(() => {
               sleep(2000).then(() => {
@@ -299,7 +299,7 @@
                 html += "<div tabindex='-1' style='color:#666;padding:6px 12px;border:none!important'>No results found. Please try again.</div>";
               }
               html += "</paper-listbox>";
-              jQuery(html).insertAfter('#search-main');
+              jQuery(html).insertAfter('#search-event');
               jQuery("#searchsuggest paper-item").addClass("searchsuggest");
               jQuery("#searchsuggest").css("position","absolute");
               jQuery("#searchsuggest").css("top","134px");
@@ -319,10 +319,10 @@
                 var string = jQuery.trim(jQuery(this).text());
                 var uri = jQuery(this).attr("uri");
                 suggestPrevValue = string;
-                jQuery('#search-main input').val(string);
-                jQuery('#search-main input').attr("uri", uri);
+                jQuery('#search-event input').val(string);
+                jQuery('#search-event input').attr("uri", uri);
               });
-              $("#search-main paper-spinner-lite").hide();
+              $("#search-event paper-spinner-lite").hide();
               jQuery('#searchsuggest').show();
               jQuery("#searchsuggest paper-item.searchsuggest:nth-child(1)").select();
               jQuery("paper-item.searchsuggest:nth-child(1)").css("background-color", "#e0e0e0");
@@ -330,7 +330,7 @@
             .fail(function() {
               console.warn("Failed to get concept search suggestions");
               jQuery('#searchsuggest').hide();
-              $("#search-main paper-spinner-lite").prop("hidden", true);
+              $("#search-event paper-spinner-lite").prop("hidden", true);
             });
           }
         }, 1200);
@@ -387,17 +387,20 @@
           var suggestions = jQuery('#searchsuggest');
           if (!suggestions.is(':visible'))
           {
-            if (jQuery.trim(jQuery("#search-main input").val()).length > 0)
+            if (jQuery.trim(jQuery("#search-event input").val()).length > 0)
             {
               //Search now
-              console.log("Searching for " + jQuery("#search-main input").val());
-              this.set("searchUri", jQuery("#search-main input").attr("uri"));
+              console.log("Searching for " + jQuery("#search-event input").val());
+              this.set("searchUri", jQuery("#search-event input").attr("uri"));
+              console.log(this.searchUri);
             }
           }
           else
           {
             //Activate search suggestions
             jQuery('#searchsuggest paper-item:nth-child(' + (jQuery('#searchsuggest').prop("selected") + 1) + ')').click();
+            $("#search-event paper-spinner-lite").prop("hidden", true);
+            $("#search-event paper-spinner-lite").hide();
           }
 
           event.preventDefault();
@@ -413,8 +416,8 @@
             jQuery('#searchsuggest').hide();
           }
           else {
-            $("#search-main paper-spinner-lite").prop("hidden", false);
-            $("#search-main paper-spinner-lite").show();
+            $("#search-event paper-spinner-lite").prop("hidden", false);
+            $("#search-event paper-spinner-lite").show();
             jQuery("paper-input.search input").css("transition", "none");
           }
           jQuery("paper-input.search input").css("opacity", 1);
@@ -423,29 +426,38 @@
       },
       searchUriChanged: function(uri)
       {
-        console.log("Getting events for " + uri);
-        jQuery("paper-input.search").prop("disabled", true);
-        jQuery("paper-progress.loading").prop("hidden", false);
-        var t = this;
-        jQuery("#search-error").prop("hidden", true);
-        jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri + "&lang=eng")
-        .done(function(data) {
-          jQuery("paper-input.search").prop("disabled", false);
-          jQuery("paper-progress.loading").prop("hidden", true);
-          t.set('events', data.events);
-          if (data.events.length == 0)
-          {
-            jQuery("#search-error").text("No events found. Try again with a broader concept.");
+        if (uri.length > 0)
+        {
+          console.log("Getting events for " + uri);
+          jQuery("paper-input.search").prop("disabled", true);
+          jQuery("paper-progress.loading").prop("hidden", false);
+          $("#search-event paper-spinner-lite").prop("hidden", true);
+          $("#search-event paper-spinner-lite").hide();
+          var t = this;
+          jQuery("#search-error").prop("hidden", true);
+          jQuery("#events paper-event").css("opacity","0.3");
+          jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri + "&lang=eng")
+          .done(function(data) {
+            jQuery("paper-input.search").prop("disabled", false);
+            jQuery("paper-progress.loading").prop("hidden", true);
+            t.set('events', data.events);
+            jQuery("#events paper-event").css("opacity","1");
+            if (data.events.length == 0)
+            {
+              jQuery("#search-error").text("No events found. Try again with a broader concept.");
+              jQuery("#search-error").prop("hidden", false);
+            }
+          })
+          .fail(function(data, data2, data3) {
+            console.warn("Failed to get events for query '" + this.search + "'");
+            jQuery("paper-input.search").prop("disabled", false);
+            jQuery("paper-progress.loading").prop("hidden", true);
+            t.set('events', [ ]);
+            jQuery("#search-error").text("Could not get data from our server. Try again in a few minutes then contact us for support.");
             jQuery("#search-error").prop("hidden", false);
-          }
-        })
-        .fail(function(data, data2, data3) {
-          console.warn("Failed to get events for query '" + this.search + "'");
-          jQuery("paper-input.search").prop("disabled", false);
-          jQuery("paper-progress.loading").prop("hidden", true);
-          jQuery("#search-error").text("Could not get data from our server. Try again in a few minutes then contact us for support.");
-          jQuery("#search-error").prop("hidden", false);
-        });
+            t.set("searchUri", "");
+          });
+        }
       },
     });
   </script>

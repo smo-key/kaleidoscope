@@ -168,8 +168,16 @@
 
     Polymer({
       is: 'concept-search',
+      properties:
+      {
+        search: { type: String, notify: true},
+        searchUri: { type: String, notify: true},
+        page: { type: String, notify: true}
+      },
       ready: function() {
-
+        this.set("search", "");
+        this.set("searchUri", "");
+        
         /** UTILITIES (WATER, GAS, ETC.) **/
         function sleep(time) {
           return new Promise((resolve) => setTimeout(resolve, time));
@@ -250,8 +258,10 @@
               {
                 jQuery('#searchsuggest').hide();
                 var string = jQuery.trim(jQuery(this).text());
+                var uri = jQuery(this).attr("uri");
                 suggestPrevValue = string;
                 jQuery('#search-main input').val(string);
+                jQuery('#search-main input').attr("uri", uri);
               });
               $("#search-main paper-spinner").hide();
               jQuery('#searchsuggest').show();
@@ -340,6 +350,9 @@
             if (jQuery.trim(jQuery("#search-main input").val()).length > 0)
             {
               //Search now
+              this.set("search", jQuery("#search-main input").val());
+              this.set("searchUri", jQuery("#search-main input").attr("uri"));
+              this.set("page", "articleList");
               console.log("Searching for " + jQuery("#search-main input").val());
             }
           }

@@ -51,15 +51,45 @@
       }
     </style>
 
-    <!-- <concept-search id="concept-search"></concept-search> -->
-    <article-list id="article-list"></article-list>
+    <concept-search id="concept-search" page="{{page}}" hidden$="{{!pages.conceptSearch}}" search="{{search}}" search-uri="{{searchUri}}"></concept-search>
+    <article-list id="article-list" page="{{page}}" hidden$="{{!pages.articleList}}" search="{{search}}" search-uri="{{searchUri}}"></article-list>
   </template>
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
   <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
   <script>
     Polymer({
-      is: 'app-index'
+      is: 'app-index',
+      properties: {
+        page: {
+          type: Object,
+          notify: true,
+          observer: "pageChanged"
+        },
+        pages: {
+          type: Object,
+          notify: true,
+          value: { conceptSearch: false, articleList: false }
+        },
+        search: {
+          type: String
+        },
+        searchUri: {
+          type: String
+        }
+      },
+      ready: function() {
+        this.set("page", "conceptSearch");
+      },
+      pageChanged: function(newPage) {
+        var pages = this.pages;
+        for (var key in this.pages) {
+          if( this.pages.hasOwnProperty(key) ) {
+            this.set("pages." + key, (key == newPage));
+          }
+        }
+        //this.set("pages", {conceptSearch: true, articleList: false});
+      }
     });
   </script>
 </dom-module>
