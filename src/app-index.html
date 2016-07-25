@@ -51,11 +51,10 @@
       }
     </style>
 
-    <template is="dom-if" if="{{pages.conceptSearch}}">
-      <concept-search id="concept-search" page="{{page}}" search="{{search}}" uri="{{uri}}"></concept-search>
-    </template>
-    <template is="dom-if" if="{{pages.articleList}}">
-      <article-list id="article-list" page="{{page}}" search="{{search}}" uri="{{uri}}"></article-list>
+    <concept-search id="concept-search" hidden$="{{!pages.conceptSearch}}" page="{{page}}" search="{{search}}" uri="{{uri}}"></concept-search>
+    <article-list id="article-list" hidden$="{{!pages.articleList}}" page="{{page}}" search="{{search}}" uri="{{uri}}"></article-list>
+    <template is="dom-if" if="{{pages.articleView}}">
+      <article-list id="article-view" page="{{page}}" search="{{search}}" uri="{{uri}}"></article-list>
     </template>
   </template>
 
@@ -73,7 +72,7 @@
         pages: {
           type: Object,
           notify: true,
-          value: { conceptSearch: false, articleList: false }
+          value: { conceptSearch: false, articleList: false, articleView: false }
         }
       },
       ready: function() {

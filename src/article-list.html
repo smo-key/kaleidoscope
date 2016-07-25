@@ -189,7 +189,7 @@
 
         <div class="row" id="events">
           <template is="dom-repeat" items="{{events}}">
-            <paper-event image="{{item.image}}" title="{{item.title}}" description="{{item.summary}}" date="{{item.time}}" location="{{item.location}}" hotness="{{item.hotness}}" article-count="{{item.articlesTotal}}"></paper-event>
+            <paper-event image="{{item.image}}" title="{{item.title}}" description="{{item.summaryShort}}" date="{{item.time}}" location="{{item.location}}" hotness="{{item.hotness}}" article-count="{{item.articlesTotal}}"></paper-event>
           </template>
         </div>
         <div id="search-error" hidden>No results found. Please try again.</div>
@@ -484,7 +484,7 @@
             jQuery("paper-progress.loading").prop("hidden", true);
             t.set('events', [ ]);
             t.set("searching", false);
-            jQuery("#search-error").text("Could not get data from our server. Try again in a few minutes then contact us for support.");
+            jQuery("#search-error").text("Could not get data from our server. Refresh this page and try again in a few minutes then contact us for support.");
             jQuery("#search-error").prop("hidden", false);
             t.set("uri", "");
           });
