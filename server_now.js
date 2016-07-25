@@ -6,7 +6,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
 {
   //&dateStart=2016-07-09 <- for recent hits only
   /**For the most part, getting first 50 articles by relevance is pretty good - however, for larger items, also get the most *recent* articles **/
-  request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount=50&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=rel&eventsPage=1', { jar: session }, function(error, response, body) {
+  request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount=200&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=rel&eventsPage=1', { jar: session }, function(error, response, body) {
     var out = { status: 500, error: undefined, events: [ ]};
     if (error || JSON.parse(body).error !== undefined) {
       console.error(body);
@@ -67,17 +67,19 @@ exports.getEvents = function(session, conceptUri, lang, cb)
           //Calculate overall hotness
           var searchRelevance = event.wgt;
           var socialScore = event.socialScore;
-          var timeDiffHours = moment(new Date()).diff(moment(event.eventDate), 'hours');
-          var recencyFactor = 10.2273515 / ((timeDiffHours)^(0.5494897));
+          var timeDiffDays = Math.ceil(moment(new Date()).diff(moment(event.eventDate), 'days', true));
+          var recencyFactor = 4.92679 / ((timeDiffDays)^(0.432481));
           var relevanceFactor = searchRelevance / maxRelevance;
           var socialFactor = 0.01772985 * ((socialScore)^(0.787861));
           var newsFactor = 0.01772985 * ((eventout.articlesLang)^(0.787861));
 
-          eventout.hotness = Math.ceil(25 * recencyFactor * (socialFactor + newsFactor));
+          eventout.hotness = Math.log10(recencyFactor * (socialFactor * newsFactor))*(100/2.5);
           eventout.relevance = eventout.hotness * relevanceFactor;
+          eventout.hotness = Math.round(eventout.hotness);
           console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
 
-          if (eventout.summary == null || eventout.relevance == 0 || eventout.title == null)
+          if (eventout.summary == null || eventout.relevance < 0.1 ||
+             eventout.hotness < 0.1 || eventout.title == null)
           {
             asynccb();
           }

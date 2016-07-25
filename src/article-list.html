@@ -151,15 +151,21 @@
         display: none;
       }
 
-      /** ARTICLES **/
+      /** EVENTS **/
       #events .row
       {
         display: flex;
         box-sizing: border-box;
         align-items: flex-start;
       }
-
-
+      #search-error
+      {
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 18px;
+        color: var(--paper-grey-500);
+      }
     </style>
 
     <paper-toolbar>
@@ -186,6 +192,7 @@
             <paper-event image="{{item.image}}" title="{{item.title}}" description="{{item.summary}}" date="{{item.time}}" location="{{item.location}}" hotness="{{item.hotness}}" article-count="{{item.articlesTotal}}"></paper-event>
           </template>
         </div>
+        <div id="search-error" hidden>No results found. Please try again.</div>
       </div>
     </div>
     <hr class="bottomdivide">
@@ -384,8 +391,6 @@
             {
               //Search now
               console.log("Searching for " + jQuery("#search-main input").val());
-              jQuery("paper-input.search").prop("disabled", true);
-              jQuery("paper-progress.loading").prop("hidden", false);
               this.set("searchUri", jQuery("#search-main input").attr("uri"));
             }
           }
@@ -419,17 +424,27 @@
       searchUriChanged: function(uri)
       {
         console.log("Getting events for " + uri);
+        jQuery("paper-input.search").prop("disabled", true);
+        jQuery("paper-progress.loading").prop("hidden", false);
         var t = this;
+        jQuery("#search-error").prop("hidden", true);
         jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri + "&lang=eng")
         .done(function(data) {
           jQuery("paper-input.search").prop("disabled", false);
           jQuery("paper-progress.loading").prop("hidden", true);
           t.set('events', data.events);
+          if (data.events.length == 0)
+          {
+            jQuery("#search-error").text("No events found. Try again with a broader concept.");
+            jQuery("#search-error").prop("hidden", false);
+          }
         })
-        .fail(function() {
+        .fail(function(data, data2, data3) {
           console.warn("Failed to get events for query '" + this.search + "'");
           jQuery("paper-input.search").prop("disabled", false);
           jQuery("paper-progress.loading").prop("hidden", true);
+          jQuery("#search-error").text("Could not get data from our server. Try again in a few minutes then contact us for support.");
+          jQuery("#search-error").prop("hidden", false);
         });
       },
     });
