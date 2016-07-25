@@ -51,8 +51,12 @@
       }
     </style>
 
-    <concept-search id="concept-search" page="{{page}}" hidden$="{{!pages.conceptSearch}}" search="{{search}}" search-uri="{{searchUri}}"></concept-search>
-    <article-list id="article-list" page="{{page}}" hidden$="{{!pages.articleList}}" search="{{search}}" search-uri="{{searchUri}}"></article-list>
+    <template is="dom-if" if="{{pages.conceptSearch}}">
+      <concept-search id="concept-search" page="{{page}}" search="{{search}}" uri="{{uri}}"></concept-search>
+    </template>
+    <template is="dom-if" if="{{pages.articleList}}">
+      <article-list id="article-list" page="{{page}}" search="{{search}}" uri="{{uri}}"></article-list>
+    </template>
   </template>
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
@@ -70,12 +74,6 @@
           type: Object,
           notify: true,
           value: { conceptSearch: false, articleList: false }
-        },
-        search: {
-          type: String
-        },
-        searchUri: {
-          type: String
         }
       },
       ready: function() {
