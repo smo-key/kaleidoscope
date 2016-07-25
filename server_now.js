@@ -5,8 +5,7 @@ var moment = require('moment');
 exports.getEvents = function(session, conceptUri, lang, cb)
 {
   //&dateStart=2016-07-09 <- for recent hits only
-  /**For the most part, getting first 50 articles by relevance is pretty good - however, for extremely large sets,
-     it may be necessary to load another 200-400 articles. **/
+  /**For the most part, getting first 50 articles by relevance is pretty good - however, for larger items, also get the most *recent* articles **/
   request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount=50&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=rel&eventsPage=1', { jar: session }, function(error, response, body) {
     var out = { status: 500, error: undefined, events: [ ]};
     if (error || JSON.parse(body).error !== undefined) {
@@ -76,7 +75,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
 
           eventout.hotness = Math.ceil(25 * recencyFactor * (socialFactor + newsFactor));
           eventout.relevance = eventout.hotness * relevanceFactor;
-          console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " News: " + newsFactor + "SocF: " + socialFactor + " Score: " + eventout.relevance);
+          console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
 
           if (eventout.summary == null || eventout.relevance == 0 || eventout.title == null)
           {

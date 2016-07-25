@@ -140,6 +140,12 @@
         top: -2px;
         color: var(--paper-purple-500);
       }
+      paper-progress.loading
+      {
+        width: 100%;
+        top: -9px;
+        --paper-progress-active-color: var(--paper-purple-500);
+      }
       paper-listbox#searchsuggest
       {
         display: none;
@@ -152,6 +158,7 @@
         box-sizing: border-box;
         align-items: flex-start;
       }
+
 
     </style>
 
@@ -171,7 +178,8 @@
     <div class="main">
       <div class="container">
         <br>
-        <paper-input active="true" on-keydown="onSearchKeypress" id="search-main" class="search" placeholder="" value="{{search}}"><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
+        <paper-input active="true" on-keydown="onSearchKeypress" id="search-main" class="search" placeholder="" value="{{search}}"><iron-icon icon="mdi:magnify" prefix></iron-icon><paper-spinner-lite active prefix hidden ></paper-spinner-lite><paper-icon-button icon="mdi:arrow-right" suffix></paper-icon-button></paper-input>
+        <paper-progress hidden class="loading" indeterminate></paper-progress>
 
         <div class="row" id="events">
           <template is="dom-repeat" items="{{events}}">
@@ -183,7 +191,7 @@
     <hr class="bottomdivide">
     <div class="bottom">
       <div class="col-xs-4" style="text-align: left">
-        <p id="image-credit"></p>
+
       </div>
       <div class="col-xs-4" style="text-align: center">
         <p>Website Copyright (C) Arthur Pachachura</p>
@@ -234,7 +242,6 @@
            }
            return a;
          }
-
 
         /** SEARCH BOX **/
         var i = 0;
@@ -377,6 +384,8 @@
             {
               //Search now
               console.log("Searching for " + jQuery("#search-main input").val());
+              jQuery("paper-input.search").prop("disabled", true);
+              jQuery("paper-progress.loading").prop("hidden", false);
               this.set("searchUri", jQuery("#search-main input").attr("uri"));
             }
           }
@@ -404,7 +413,7 @@
             jQuery("paper-input.search input").css("transition", "none");
           }
           jQuery("paper-input.search input").css("opacity", 1);
-          jQuery("paper-input.search").attr("active", !empty);
+          jQuery("paper-input.search").attr("active", (!empty).toString());
         }
       },
       searchUriChanged: function(uri)
@@ -413,10 +422,14 @@
         var t = this;
         jQuery.get(server + "/api/1/events?q=" + this.search + "&uri=" + this.searchUri + "&lang=eng")
         .done(function(data) {
+          jQuery("paper-input.search").prop("disabled", false);
+          jQuery("paper-progress.loading").prop("hidden", true);
           t.set('events', data.events);
         })
         .fail(function() {
           console.warn("Failed to get events for query '" + this.search + "'");
+          jQuery("paper-input.search").prop("disabled", false);
+          jQuery("paper-progress.loading").prop("hidden", true);
         });
       },
     });
