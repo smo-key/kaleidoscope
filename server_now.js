@@ -11,9 +11,9 @@ exports.getEvents = function(session, conceptUri, lang, cb)
     if (error || JSON.parse(body).error !== undefined) {
       console.error(body);
       console.error(error);
-      out.status = 500;
-      out.error = error;
-      if (!error) out.error = JSON.parse(body).error;
+      out.status = (JSON.parse(body).error !== undefined) ? 200 : 500;
+      out.events = (JSON.parse(body).error !== undefined) ? [ ] : undefined;
+      out.error = error || JSON.parse(body).error;
       cb(out);
     }
     else {
@@ -70,13 +70,13 @@ exports.getEvents = function(session, conceptUri, lang, cb)
           var timeDiffDays = Math.ceil(moment(new Date()).diff(moment(event.eventDate), 'days', true));
           var recencyFactor = 4.92679 / ((timeDiffDays)^(0.432481));
           var relevanceFactor = searchRelevance / maxRelevance;
-          var socialFactor = 0.01772985 * ((socialScore)^(0.787861));
-          var newsFactor = 0.01772985 * ((eventout.articlesLang)^(0.787861));
+          var socialFactor = 0.017729 * ((socialScore)^(0.787861));
+          var newsFactor = 0.017729 * ((eventout.articlesTotal)^(0.787861));
 
           eventout.hotness = Math.log10(recencyFactor * (socialFactor * newsFactor))*(100/2.5);
           eventout.relevance = eventout.hotness * relevanceFactor;
           eventout.hotness = Math.round(eventout.hotness);
-          console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
+          console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " Articles: " + eventout.articlesTotal + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
 
           if (eventout.summary == null || eventout.relevance < 0.1 ||
              eventout.hotness < 0.1 || eventout.title == null)
