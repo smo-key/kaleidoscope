@@ -1,6 +1,7 @@
 var request = require('request');
 var async = require('async');
 var moment = require('moment');
+var _ = require('lodash');
 
 function parseSummary(summary, cb)
 {
@@ -79,106 +80,112 @@ exports.getEvents = function(session, conceptUri, lang, cb)
 
       //De-dup
       var combined = r[0].concat(r[1]);
-      var results = combined.filter(function(elem, index, self) {
-        return index == self.indexOf(elem);
-      });
+      var results = _.uniqBy(combined, 'uri');
 
       //Rate each event and append to array
-      var maxRelevance = results[0].wgt;
-      async.eachLimit(results, 8, function(event, asynccb)
+      if (results.length > 0)
       {
-        //Get metadata
-        if (event.warning === undefined)
+        var maxRelevance = results[0].wgt;
+        async.eachLimit(results, 8, function(event, asynccb)
         {
-          var eventout = { };
-          eventout.uri = event.uri;
-          eventout.title = event.title[lang] || event.title["eng"] || null;
-          eventout.time = moment(event.eventDate, "YYYY-MM-DD").fromNow();
-          if (eventout.time.indexOf("in") > -1) eventout.time = "just now";
-          if (eventout.time.indexOf("hours ago") > -1) eventout.time = "today";
-          eventout.image = event.images[0] || null;
-
-          //Location simplification
-          if (event.location === undefined || event.location == null || event.location.length == 0) { eventout.location = "" }
-          else {
-            eventout.location = event.location.label[lang] || event.location.label["eng"] || "";
-            if (event.location.country !== undefined && event.location.country != null) eventout.location += ", " + (event.location.country.label[lang] || event.location.country.label["eng"] || "");
-            var matches = eventout.location.split(/\s*,\s*/);
-            if (matches.length > 2)
-            {
-              eventout.location = matches[0].trim() + ", " + matches[1].trim();
-            }
-          }
-
-          //Parse summary
-          eventout.summary = event.summary[lang] || event.summary["eng"] || null;
-          if (eventout.summary != null)
+          //Get metadata
+          if (event.warning === undefined)
           {
-            var splits = eventout.summary.split(' ');
-            eventout.summary = eventout.summary.substring(0, eventout.summary.length - splits[splits.length - 1].length).trim();
-            eventout.summary += "...";
-          }
+            var eventout = { };
+            eventout.uri = event.uri;
+            eventout.title = event.title[lang] || event.title["eng"] || event.title[0] || null;
+            eventout.time = moment(event.eventDate, "YYYY-MM-DD").fromNow();
+            if (eventout.time.indexOf("in") > -1) eventout.time = "just now";
+            if (eventout.time.indexOf("hours ago") > -1) eventout.time = "today";
+            eventout.image = event.images[0] || null;
 
-          parseSummary(eventout.summary, function(summaryShort)
-          {
-            eventout.summaryShort = summaryShort;
-
-            if ((eventout.summaryShort != null) && (eventout.summaryShort.length > 250))
-            {
-              eventout.summaryShort = eventout.summaryShort.match(/^.{0,250}\b/)[0].trim();
-              eventout.summaryShort += "...";
-            }
-
-            //Get article counts
-            eventout.articlesTotal = 0;
-            eventout.articlesLang = event.articleCounts[lang] || event.articleCounts["eng"] || 0;
-            eventout.languages = 0;
-            for(key in event.articleCounts) {
-              if(event.articleCounts.hasOwnProperty(key)) {
-                eventout.articlesTotal += event.articleCounts[key];
-                eventout.languages++;
+            //Location simplification
+            if (event.location === undefined || event.location == null || event.location.length == 0) { eventout.location = "" }
+            else {
+              eventout.location = event.location.label[lang] || event.location.label["eng"] || "";
+              if (event.location.country !== undefined && event.location.country != null) eventout.location += ", " + (event.location.country.label[lang] || event.location.country.label["eng"] || "");
+              var matches = eventout.location.split(/\s*,\s*/);
+              if (matches.length > 2)
+              {
+                eventout.location = matches[0].trim() + ", " + matches[1].trim();
               }
             }
 
-            //Calculate overall hotness
-            var searchRelevance = event.wgt;
-            var socialScore = event.socialScore;
-            var timeDiffDays = Math.ceil(moment(new Date()).diff(moment(event.eventDate), 'days', true));
-            if (timeDiffDays < 0.1) { timeDiffDays = 0.1; }
-            var recencyFactor = 4.92679 / ((timeDiffDays)^(0.432481));
-            if (recencyFactor > 50 || recencyFactor < 0) { recencyFactor = 50; }
-            var relevanceFactor = (searchRelevance / maxRelevance)^4;
-            var socialFactor = 0.017729 * ((socialScore)^(0.787861));
-            var newsFactor = 0.017729 * ((eventout.articlesTotal)^(0.787861));
-
-            eventout.hotness = (Math.log10(recencyFactor * (socialFactor * newsFactor))*(100/2.5)) + 3;
-            eventout.relevance = eventout.hotness * relevanceFactor;
-            eventout.hotness = Math.ceil(eventout.hotness);
-            // console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " Articles: " + eventout.articlesTotal + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
-
-            if (eventout.summary == null || eventout.relevance < 0.1 ||
-               eventout.hotness < 0.1 || eventout.title == null)
+            //Parse summary
+            eventout.summary = event.summary[lang] || event.summary["eng"] || event.summary[0] || null;
+            if (eventout.summary != null)
             {
-              asynccb();
+              var splits = eventout.summary.split(' ');
+              eventout.summary = eventout.summary.substring(0, eventout.summary.length - splits[splits.length - 1].length).trim();
+              eventout.summary += "...";
             }
-            else {
-              out.events.push(eventout);
-              asynccb();
-            }
+
+            parseSummary(eventout.summary, function(summaryShort)
+            {
+              eventout.summaryShort = summaryShort;
+
+              if ((eventout.summaryShort != null) && (eventout.summaryShort.length > 250))
+              {
+                eventout.summaryShort = eventout.summaryShort.match(/^.{0,250}\b/)[0].trim();
+                eventout.summaryShort += "...";
+              }
+
+              //Get article counts
+              eventout.articlesTotal = 0;
+              eventout.articlesLang = event.articleCounts[lang] || event.articleCounts["eng"] || 0;
+              eventout.languages = 0;
+              for(key in event.articleCounts) {
+                if(event.articleCounts.hasOwnProperty(key)) {
+                  eventout.articlesTotal += event.articleCounts[key];
+                  eventout.languages++;
+                }
+              }
+
+              //Calculate overall hotness
+              var searchRelevance = event.wgt;
+              var socialScore = event.socialScore;
+              var timeDiffDays = Math.ceil(moment(new Date()).diff(moment(event.eventDate), 'days', true));
+              if (timeDiffDays < 0.1) { timeDiffDays = 0.1; }
+              var recencyFactor = 4.92679 / ((timeDiffDays)^(0.432481));
+              if (recencyFactor > 50 || recencyFactor < 0) { recencyFactor = 50; }
+              var relevanceFactor = (searchRelevance / maxRelevance)^4;
+              var socialFactor = 0.017729 * ((socialScore)^(0.787861));
+              var newsFactor = 0.017729 * ((eventout.articlesTotal)^(0.787861));
+
+              eventout.hotness = (Math.log10(recencyFactor * (socialFactor * newsFactor))*(100/2.5)) + 3;
+              eventout.relevance = eventout.hotness * relevanceFactor;
+              eventout.hotness = Math.ceil(eventout.hotness);
+              // console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " Articles: " + eventout.articlesTotal + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
+
+              if (eventout.summary == null || eventout.relevance < 0.1 ||
+                 eventout.hotness < 0.1 || eventout.title == null)
+              {
+                asynccb();
+              }
+              else {
+                out.events.push(eventout);
+                asynccb();
+              }
+            });
+          } else { asynccb(); }
+        }, function (err) {
+          console.log("Done analyzing events!");
+
+          //Sort array
+          out.events = out.events.sort(function(e1, e2) {
+            return e2.relevance - e1.relevance;
           });
-        } else { asynccb(); }
-      }, function (err) {
-        console.log("Done analyzing events!");
 
-        //Sort array
-        out.events = out.events.sort(function(e1, e2) {
-          return e2.relevance - e1.relevance;
+          //Return
+          out.status = 200;
+          cb(out);
         });
-
-        //Return
+      }
+      else {
         out.status = 200;
+        out.events = [ ];
         cb(out);
-      });
+      }
     }
   });
 }
