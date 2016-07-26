@@ -139,7 +139,7 @@
         display: inline-block;
         --paper-progress-active-color: var(--paper-red-500);
         position: relative;
-        top: -3px;
+        top: -4px;
         margin-left: 12px;
       }
       div.event-stats .count
@@ -255,9 +255,15 @@
         <div class="container">
           <div class="event-stats-container">
             <div class="influence">
-              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence<paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
+              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence: [[article.hotness]]<paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
             </div>
-            <div class="count"><strong>[[article.articlesTotal]]</strong> articles in <strong>[[article.languages]]</strong> languages<br><strong>[[article.articlesLang]]</strong> articles in English</div>
+            <div class="count">
+              <template is="dom-if" if="{{showLangTotal(article.articlesTotal, article.articlesLang)}}">
+                <strong>[[article.articlesTotal]]</strong> articles in <strong>[[article.languages]]</strong> languages
+              <br>
+              </template>
+              <strong>[[article.articlesLang]]</strong> articles in English
+            </div>
           </div>
         </div>
         <div class="event-analysis-container">
@@ -304,6 +310,10 @@
       {
         var colors = [ "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#009688", "#43A047", "#039BE5", "#0097A7", "#EF6C00"];
         return colors[Math.floor(Math.random()*colors.length)];
+      },
+      showLangTotal: function(articlesTotal, articlesLang)
+      {
+        return articlesTotal != articlesLang;
       },
       hasLocation: function(location)
       {

@@ -112,6 +112,13 @@ exports.getEvents = function(session, conceptUri, lang, cb)
 
           //Parse summary
           eventout.summary = event.summary[lang] || event.summary["eng"] || null;
+          if (eventout.summary != null)
+          {
+            var splits = eventout.summary.split(' ');
+            eventout.summary = eventout.summary.substring(0, eventout.summary.length - splits[splits.length - 1].length).trim();
+            eventout.summary += "...";
+          }
+
           parseSummary(eventout.summary, function(summaryShort)
           {
             eventout.summaryShort = summaryShort;
@@ -125,10 +132,11 @@ exports.getEvents = function(session, conceptUri, lang, cb)
             //Get article counts
             eventout.articlesTotal = 0;
             eventout.articlesLang = event.articleCounts[lang] || event.articleCounts["eng"] || 0;
-            eventout.languages = event.articleCounts.length;
+            eventout.languages = 0;
             for(key in event.articleCounts) {
               if(event.articleCounts.hasOwnProperty(key)) {
                 eventout.articlesTotal += event.articleCounts[key];
+                eventout.languages++;
               }
             }
 
@@ -146,7 +154,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
             eventout.hotness = (Math.log10(recencyFactor * (socialFactor * newsFactor))*(100/2.5)) + 3;
             eventout.relevance = eventout.hotness * relevanceFactor;
             eventout.hotness = Math.ceil(eventout.hotness);
-            console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " Articles: " + eventout.articlesTotal + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
+            // console.log("SocBase: " + socialScore + " Time: " + recencyFactor + " Soc: " + socialFactor + " Articles: " + eventout.articlesTotal + " News: " + newsFactor +  " SocF: " + socialFactor + " Score: " + eventout.relevance);
 
             if (eventout.summary == null || eventout.relevance < 0.1 ||
                eventout.hotness < 0.1 || eventout.title == null)
