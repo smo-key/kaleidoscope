@@ -53,8 +53,8 @@
     </style>
 
     <concept-search id="concept-search" hidden$="{{!pages.conceptSearch}}" page="{{page}}" search="{{search}}" uri="{{uri}}"></concept-search>
-    <article-list id="article-list" hidden$="{{!pages.articleList}}" page="{{page}}" search="{{search}}" uri="{{uri}}"></article-list>
-    <article-view id="article-view" hidden$="{{!pages.articleView}}" page="{{page}}" search="{{search}}" article="{{article}}"></article-view>
+    <article-list id="article-list" hidden$="{{!pages.articleList}}" page="{{page}}" search="{{search}}" uri="{{uri}}" active-article="{{article}}"></article-list>
+    <article-view id="article-view" hidden$="{{!pages.articleView}}" page="{{page}}" article="{{article}}"></article-view>
   </template>
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
@@ -79,13 +79,14 @@
         }
       },
       ready: function() {
-        var article = { title: "Turkey to disband elite presidential guard unit", date: "3 days ago", location: "Constantinople, Turkey", summary: "Turkish authorities have arrested more than 13,000 people believed to be tied to the coup attempt and have gutted the country's civil services sector suspending over 60,000 educators, judges and police.", hotness: 83, articleCount: 605, image: "http://cdn4.img.sputniknews.com/images/104328/21/1043282180.jpg", uri: 12345678, languages: 6 };
-        this.set("article", article);
+        // var article = { title: "Turkey to disband elite presidential guard unit", date: "3 days ago", location: "Constantinople, Turkey", summary: "Turkish authorities have arrested more than 13,000 people believed to be tied to the coup attempt and have gutted the country's civil services sector suspending over 60,000 educators, judges and police.", hotness: 83, articleCount: 605, image: "http://cdn4.img.sputniknews.com/images/104328/21/1043282180.jpg", uri: 12345678, languages: 6 };
+        // this.set("article", article);
 
-        // this.set("page", "conceptSearch");
-        this.set("page", "articleView");
+        this.set("page", "conceptSearch");
+        // this.set("page", "articleView");
       },
       pageChanged: function(newPage) {
+        console.log("Page changed to " + newPage);
         var pages = this.pages;
         for (var key in this.pages) {
           if( this.pages.hasOwnProperty(key) ) {

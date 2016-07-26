@@ -77,6 +77,7 @@
         color: var(--paper-grey-700);
         height: 130px;
         overflow: hidden;
+        word-break: break-word;
       }
       .card-actions
       {
@@ -124,29 +125,29 @@
       }
     </style>
 
-    <paper-card>
-      <div class="card-image" style="background-color: {{randomColor()}}; background-image: url('[[image]]')">
-        <div class="card-heading" style="{{imageClass(image)}}">
+    <paper-card on-tap="openEvent">
+      <div class="card-image" style="background-color: {{randomColor()}}; background-image: url('[[article.image]]')">
+        <div class="card-heading" style="{{imageClass(article.image)}}">
           <div class="card-heading-container">
-            [[title]]
+            [[article.title]]
             <br>
             <div class="subtitle">
-              <span style='float:left'>[[date]]</span>
-              <template is="dom-if" if="{{hasLocation(location)}}">
-                <span style='float:right'><iron-icon icon="mdi:map-marker"></iron-icon>[[location]]</span>
+              <span style='float:left'>[[article.time]]</span>
+              <template is="dom-if" if="{{hasLocation(article.location)}}">
+                <span style='float:right'><iron-icon icon="mdi:map-marker"></iron-icon>[[article.location]]</span>
               </template>
             </div>
           </div>
         </div>
       </div>
       <div class="card-content">
-        [[description]]
+        [[article.summaryShort]]
       </div>
       <div class="card-actions">
-        <span id="hotness" class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="[[hotness]]"></paper-progress></span>
-        <span class="count"><strong>[[articleCount]]</strong> articles</span>
+        <span id="hotness" class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="[[article.hotness]]"></paper-progress></span>
+        <span class="count"><strong>[[article.articlesLang]]</strong> articles</span>
       </div>
-      <paper-tooltip for="hotness" position="right">Event Influence: [[hotness]]</paper-tooltip>
+      <paper-tooltip for="hotness" position="right">Event Influence: [[article.hotness]]</paper-tooltip>
     </paper-card>
   </template>
 
@@ -154,13 +155,9 @@
     Polymer({
       is: 'paper-event',
       properties: {
-        image: String,
-        title: String,
-        date: String,
-        location: String,
-        description: String,
-        hotness: Number,
-        articleCount: String
+        article: { type: String, notify: true},
+        activeArticle: { type: String, notify: true},
+        page: { type: String, notify: true}
       },
       imageClass: function(image)
       {
@@ -174,6 +171,13 @@
       hasLocation: function(location)
       {
         return (location.length > 0);
+      },
+      openEvent: function()
+      {
+        console.log("Open event!");
+        console.log(this.article);
+        this.set("activeArticle", this.article);
+        this.set("page", "articleView");
       }
     });
   </script>

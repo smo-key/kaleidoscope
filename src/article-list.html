@@ -189,7 +189,7 @@
 
         <div class="row" id="events">
           <template is="dom-repeat" items="{{events}}">
-            <paper-event image="{{item.image}}" title="{{item.title}}" description="{{item.summaryShort}}" date="{{item.time}}" location="{{item.location}}" hotness="{{item.hotness}}" article-count="{{item.articlesTotal}}"></paper-event>
+            <paper-event article="{{item}}" page="{{page}}" active-article="{{activeArticle}}"></paper-event>
           </template>
         </div>
         <div id="search-error" hidden>No results found. Please try again.</div>
@@ -232,7 +232,9 @@
         searching: {
           type: Boolean,
           notify: true
-        }
+        },
+        page: { type: String, notify: true},
+        activeArticle: { type: String, notify: true}
       },
       observers: [
         'uriChanged(uri,search)',

@@ -227,13 +227,13 @@
         <div class="event-heading">
           <div class="container event-heading-container">
             <div class="event-back-container">
-              <paper-icon-button id="back" icon="mdi:arrow-left"></paper-icon-button>
+              <paper-icon-button id="back" on-tap="closeWindow" icon="mdi:arrow-left"></paper-icon-button>
             </div>
             <div class="event-container" style="width: 100%">
               [[article.title]]
               <br>
               <div class="event-subtitle" style="font-size: 16px; display: block; width: 100%; margin-top: 18px;position:relative;bottom: 6px;">
-                <span style='float:left'>[[article.date]]</span>
+                <span style='float:left'>[[article.time]]</span>
                 <template is="dom-if" if="{{hasLocation(article.location)}}">
                   <span style='float:right'><iron-icon icon="mdi:map-marker" style="height:24px;width:24px;margin-right: 4px;position:relative;top:-1px;"></iron-icon>[[article.location]]</span>
                 </template>
@@ -257,7 +257,7 @@
             <div class="influence">
               <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence<paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
             </div>
-            <div class="count"><strong>[[article.articleCount]]</strong> articles in <strong>[[article.languages]]</strong> langauges</div>
+            <div class="count"><strong>[[article.articlesTotal]]</strong> articles in <strong>[[article.languages]]</strong> languages<br><strong>[[article.articlesLang]]</strong> articles in English</div>
           </div>
         </div>
         <div class="event-analysis-container">
@@ -290,7 +290,8 @@
         article: {
           type: Object,
           notify: true
-        }
+        },
+        page: { type: String, notify: true}
       },
       ready: function() {
 
@@ -307,6 +308,10 @@
       hasLocation: function(location)
       {
         return (location.length > 0);
+      },
+      closeWindow: function()
+      {
+        this.set("page", "articleList");
       }
     });
   </script>

@@ -19,7 +19,7 @@ function parseSummary(summary, cb)
         {
           summaryShort += match + ".";
         }
-        else if (/[A-Z][a-z]{0,3}\b/.test(matchWords[matchWords.length - 1]))
+        else if (/[A-Z][A-Za-z]{0,3}\b/.test(matchWords[matchWords.length - 1]))
         {
           summaryShort += match + ".";
         }
