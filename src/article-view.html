@@ -1,0 +1,313 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/paper-styles/color.html">
+<link rel="import" href="../lib/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../lib/paper-input/paper-input.html">
+<link rel="import" href="../lib/paper-button/paper-button.html">
+<link rel="import" href="../lib/paper-card/paper-card.html">
+<link rel="import" href="../lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../lib/paper-progress/paper-progress.html">
+<link rel="import" href="../lib/paper-spinner/paper-spinner.html">
+<link rel="import" href="../lib/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../lib/paper-listbox/paper-listbox.html">
+<link rel="import" href="../lib/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../lib/paper-item/paper-item.html">
+<link rel="import" href="../lib/iron-icon/iron-icon.html">
+<link rel="import" href="../lib/paper-tooltip/paper-tooltip.html">
+
+<link rel="import" href="mdi.html">
+
+<dom-module id="article-view">
+  <template>
+    <style is="custom-style">
+      /** BASE **/
+      :host {
+        display: block;
+        margin: 0;
+        padding: 0;
+        background: var(--paper-grey-50);
+        color: #fff;
+        font-family: 'Roboto', 'Noto', sans-serif;
+        width: 100%;
+      }
+      h1, h2, h3, h4, h5
+      {
+        font-weight: 300;
+      }
+      a.white
+      {
+        color: #fff!important;
+      }
+
+      /** TOOLBAR **/
+      paper-toolbar
+      {
+        --paper-toolbar-background: rgba(0,0,0,0.6);
+        font-family: 'Roboto', 'Noto', sans-serif;
+        z-index: 10;
+      }
+      paper-toolbar paper-button
+      {
+        float: right;
+        text-transform: none;
+        padding: 12px 12px 11px 12px;
+      }
+      paper-toolbar paper-button iron-icon
+      {
+        margin-right: 6px;
+        width: 24px;
+        height: 24px;
+      }
+      paper-toolbar .title
+      {
+        position: relative;
+        top: 12px;
+      }
+
+      div.main
+      {
+        width: 100%;
+        display: block;
+        top: 0;
+        left: 0;
+        right: 0;
+        position: absolute;
+      }
+      .event-image
+      {
+        height: 350px;
+        width: 100%;
+        display: block;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
+      .event-heading
+      {
+        top: 0px;
+        height: 350px;
+        color: #fff;
+        font-size: 30px;
+        position: relative;
+        display: flex;
+        justify-content: flex-end;
+        box-sizing: border-box;
+        align-items: flex-end;
+        padding: 12px 16px;
+
+        background:-moz-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 50%);
+        background:-webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 50%);
+        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 50%);
+      }
+      .event-description
+      {
+        color: var(--paper-grey-900);
+        font-size: 20px;
+        padding: 20px 0;
+        background-color: var(--paper-grey-200);
+      }
+
+      div.event-stats
+      {
+        width: 100%;
+        padding-top: 14px;
+      }
+      div.event-stats .event-stats-container
+      {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        box-sizing: border-box;
+        align-items: flex-start;
+      }
+      div.event-stats .influence
+      {
+        color: var(--paper-red-500);
+        font-size: 18px;
+      }
+      div.event-stats .influence iron-icon
+      {
+        width: 28px;
+        height: 28px;
+        margin-right: 6px;
+        position: relative;
+        top: -2px;
+      }
+      div.event-stats .influence paper-progress
+      {
+        min-width: 0;
+        width: 200px;
+        display: inline-block;
+        --paper-progress-active-color: var(--paper-red-500);
+        position: relative;
+        top: -3px;
+        margin-left: 12px;
+      }
+      div.event-stats .count
+      {
+        color: var(--paper-grey-900);
+        font-size: 18px;
+        position: relative;
+        top: 2px;
+      }
+      div.event-heading-container
+      {
+        display: flex;
+        justify-content: center;
+        box-sizing: border-box;
+        align-items: flex-start;
+      }
+      div.event-analysis-container
+      {
+        width: 100%;
+        text-align: center;
+      }
+      div.event-analysis-container #analyze
+      {
+        color: var(--paper-blue-500);
+        margin-top: 24px;
+        border: 1px var(--paper-blue-500) solid;
+        font-size: 20px;
+        padding: 14px 20px;
+      }
+      div.event-back-container
+      {
+        margin-right: 6px;
+        top: -4px;
+        position: relative;
+        left: -10px;
+      }
+      div.event-back-container #back
+      {
+        --paper-icon-button-ink-color: var(--paper-grey-200);
+        height: 48px;
+        width: 48px;
+      }
+      div.event-description-buttons
+      {
+        margin-top: 12px;
+        text-align: left;
+      }
+      div.event-description-buttons #read
+      {
+        --paper-icon-button-ink-color: var(--paper-blue-500);
+        font-size: 16px;
+        border: 1px var(--paper-grey-400) solid;
+        position: relative;
+        left: -3px;
+      }
+
+      div.bottom
+      {
+        font-size: 11px;
+        position: static;
+        left: 0;
+        right: 0;
+        color: var(--paper-grey-500);
+        display: flex;
+        justify-content: center;
+        box-sizing: border-box;
+        align-items: flex-end;
+        padding-bottom: 9px;
+        margin-top: 40px;
+      }
+      div.bottom a
+      {
+        color: var(--paper-grey-900)!important;
+      }
+    </style>
+
+    <paper-toolbar>
+      <div class="container">
+        <span class="title">Project Kaleidoscope</span>
+        <paper-button><iron-icon icon="mdi:earth"></iron-icon>English</paper-button>
+      </div>
+    </paper-toolbar>
+    <div class="main">
+      <div class="event-image" style="background-color: {{randomColor()}}; background-image: url('[[article.image]]')">
+        <div class="event-heading">
+          <div class="container event-heading-container">
+            <div class="event-back-container">
+              <paper-icon-button id="back" icon="mdi:arrow-left"></paper-icon-button>
+            </div>
+            <div class="event-container" style="width: 100%">
+              [[article.title]]
+              <br>
+              <div class="event-subtitle" style="font-size: 16px; display: block; width: 100%; margin-top: 18px;position:relative;bottom: 6px;">
+                <span style='float:left'>[[article.date]]</span>
+                <template is="dom-if" if="{{hasLocation(article.location)}}">
+                  <span style='float:right'><iron-icon icon="mdi:map-marker" style="height:24px;width:24px;margin-right: 4px;position:relative;top:-1px;"></iron-icon>[[article.location]]</span>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="event-description">
+        <div class="container">
+          [[article.summary]]
+          <br>
+          <!-- <div class="event-description-buttons">
+            <paper-button id="read">Read Article</paper-button>
+          </div> -->
+        </div>
+      </div>
+      <div class="event-stats">
+        <div class="container">
+          <div class="event-stats-container">
+            <div class="influence">
+              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence<paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
+            </div>
+            <div class="count"><strong>[[article.articleCount]]</strong> articles in <strong>[[article.languages]]</strong> langauges</div>
+          </div>
+        </div>
+        <div class="event-analysis-container">
+          <paper-button id="analyze">Analyze now</paper-button>
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="col-xs-4" style="text-align: left">
+
+        </div>
+        <div class="col-xs-4" style="text-align: center">
+          <p>Website Copyright (C) Arthur Pachachura</p>
+        </div>
+        <div class="col-xs-4" style="text-align: right">
+          <p>Article aggregation powered by <a class="white" href="https://eventregistry.org">EventRegistry</a></o>
+        </div>
+      </div>
+    </div>
+
+
+  </template>
+
+  <script src="/lib/jquery/dist/jquery.min.js"></script>
+  <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script>
+    Polymer({
+      is: 'article-view',
+      properties:
+      {
+        article: {
+          type: Object,
+          notify: true
+        }
+      },
+      ready: function() {
+
+      },
+      imageClass: function(image)
+      {
+        return (image !== undefined && image != null && image.length > 0) ? "background:-moz-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 40%);background:-webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 100%);background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 40%);filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#a6000000',GradientType=0 );" : "";
+      },
+      randomColor: function()
+      {
+        var colors = [ "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#009688", "#43A047", "#039BE5", "#0097A7", "#EF6C00"];
+        return colors[Math.floor(Math.random()*colors.length)];
+      },
+      hasLocation: function(location)
+      {
+        return (location.length > 0);
+      }
+    });
+  </script>
+</dom-module>

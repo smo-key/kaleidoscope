@@ -12,6 +12,7 @@
 <link rel="import" href="mdi.html">
 <link rel="import" href="concept-search.html">
 <link rel="import" href="article-list.html">
+<link rel="import" href="article-view.html">
 
 <dom-module id="app-index">
   <template>
@@ -26,7 +27,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--paper-grey-50);
+        /*background: var(--paper-grey-50);*/
         color: #fff;
         font-family: 'Roboto', 'Noto', sans-serif;
       }
@@ -53,9 +54,7 @@
 
     <concept-search id="concept-search" hidden$="{{!pages.conceptSearch}}" page="{{page}}" search="{{search}}" uri="{{uri}}"></concept-search>
     <article-list id="article-list" hidden$="{{!pages.articleList}}" page="{{page}}" search="{{search}}" uri="{{uri}}"></article-list>
-    <template is="dom-if" if="{{pages.articleView}}">
-      <article-list id="article-view" page="{{page}}" search="{{search}}" uri="{{uri}}"></article-list>
-    </template>
+    <article-view id="article-view" hidden$="{{!pages.articleView}}" page="{{page}}" search="{{search}}" article="{{article}}"></article-view>
   </template>
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
@@ -73,10 +72,18 @@
           type: Object,
           notify: true,
           value: { conceptSearch: false, articleList: false, articleView: false }
+        },
+        article: {
+          type: Object,
+          notify: true
         }
       },
       ready: function() {
-        this.set("page", "conceptSearch");
+        var article = { title: "Turkey to disband elite presidential guard unit", date: "3 days ago", location: "Constantinople, Turkey", summary: "Turkish authorities have arrested more than 13,000 people believed to be tied to the coup attempt and have gutted the country's civil services sector suspending over 60,000 educators, judges and police.", hotness: 83, articleCount: 605, image: "http://cdn4.img.sputniknews.com/images/104328/21/1043282180.jpg", uri: 12345678, languages: 6 };
+        this.set("article", article);
+
+        // this.set("page", "conceptSearch");
+        this.set("page", "articleView");
       },
       pageChanged: function(newPage) {
         var pages = this.pages;

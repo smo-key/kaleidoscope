@@ -81,7 +81,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
       var combined = r[0].concat(r[1]);
       var results = combined.filter(function(elem, index, self) {
         return index == self.indexOf(elem);
-      })
+      });
 
       //Rate each event and append to array
       var maxRelevance = results[0].wgt;
