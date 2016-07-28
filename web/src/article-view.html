@@ -274,7 +274,7 @@
           </div>
         </div>
         <div class="event-analysis-container">
-          <paper-button id="analyze">Analyze now</paper-button>
+          <paper-button on-tap="analyze" id="analyze">Analyze now</paper-button>
         </div>
       </div>
       <div class="bottom">
@@ -308,6 +308,18 @@
       },
       ready: function() {
 
+      },
+      analyze: function() {
+        var text = this.article.summary;
+        console.log(text);
+        jQuery.get(server + "/api/1/analyze?text=" + text)
+        .done(function(data) {
+          data = JSON.parse(data);
+          console.log(data);
+        })
+        .fail(function(data, data2, data3) {
+          console.warn("Failed to start analysis");
+        });
       },
       imageClass: function(image)
       {

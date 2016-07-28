@@ -8,6 +8,8 @@ var now = require("./server_now.js");
 const debug = true;
 cache.setDebug(debug);
 
+const ml_server = "http://127.0.0.1:8002"
+
 /** LOGIN TO PRIVATE API **/
 var session = request.jar();
 request.post('http://eventregistry.org/login',
@@ -68,6 +70,13 @@ app.get('/api/1/events', function(req, res) {
     res.status(status).json(data);
   });
 });
+
+app.get('/api/1/analyze', function(req, res) {
+  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  request(ml_server + '/ml/analyze/text_basic?text=' + req.query.text, function(error, response, body) {
+    res.status(200).json(body);
+  });
+})
 
 /** LISTEN **/
 app.listen(8001, function () {
