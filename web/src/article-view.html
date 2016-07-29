@@ -136,6 +136,11 @@
         color: var(--paper-blue-500);
         font-size: 18px;
       }
+      div.event-stats .influence .bias.grey,
+      div.event-stats .influence .sentiment.grey
+      {
+        color: var(--paper-grey-500);
+      }
       div.event-stats .influence .sentiment
       {
         color: var(--paper-green-500);
@@ -165,6 +170,11 @@
       div.event-stats .influence .bias paper-progress
       {
         --paper-progress-active-color: var(--paper-blue-500);
+      }
+      div.event-stats .influence .bias.grey paper-progress,
+      div.event-stats .influence .sentiment.grey paper-progress
+      {
+        --paper-progress-active-color: var(--paper-grey-500);
       }
       div.event-stats .influence .sentiment paper-progress
       {
@@ -242,6 +252,17 @@
       {
         color: var(--paper-grey-900)!important;
       }
+
+      div.event-image paper-progress.analyzing
+      {
+        position: absolute;
+        top: 346px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        --paper-progress-active-color: var(--paper-green-500);
+        --paper-progress-container-color: transparent;
+      }
     </style>
 
     <paper-toolbar>
@@ -254,7 +275,7 @@
       <div class="event-image" style="background-color: {{randomColor()}}; background-image: url('[[article.image]]')">
         <div class="event-heading">
           <div class="container event-heading-container">
-            <div class="event-back-container">
+            <div class="event-back-container" hidden$="{{analyzing}}">
               <paper-icon-button id="back" on-tap="closeWindow" icon="mdi:arrow-left"></paper-icon-button>
             </div>
             <div class="event-container" style="width: 100%">
@@ -269,6 +290,7 @@
             </div>
           </div>
         </div>
+        <paper-progress class="analyzing" indeterminate hidden$={{!analyzing}}></paper-progress>
       </div>
       <div class="event-description">
         <div class="container">
@@ -285,14 +307,18 @@
             <div class="influence">
               <div style="float:left">
                 <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence: [[article.hotness]]</span>
-                <template is="dom-if" if="{{ready}}">
+                <template is="dom-if" if="{{hasSentiment}}">
                   <br><span class="bias"><iron-icon icon="mdi:scale-balance"></iron-icon>Objectivity Guess: <strong>[[biasString]]</strong></span>
                   <br><span class="sentiment"><iron-icon icon="{{sentimentIcon}}"></iron-icon>Opinion Guess: <strong>[[sentimentString]]</strong></span>
                 </template>
+                <template is="dom-if" if="{{analyzing}}">
+                  <br><span class="bias grey"><iron-icon icon="mdi:scale-balance"></iron-icon>Objectivity: Analyzing...</span>
+                  <br><span class="sentiment grey"><iron-icon icon="{{sentimentIcon}}"></iron-icon>Opinion: Analyzing...</span>
+                </template>
               </div>
-              <div style="float:left;position:relative;top: 3px">
+              <div style="float:left;position:relative;top:3px">
                 <span class="hotness" style="position:relative;top:-3px"><paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
-                <template is="dom-if" if="{{ready}}">
+                <template is="dom-if" if="{{hasSentiment}}">
                   <br><span class="bias"><paper-progress class="level" value="[[bias]]"></paper-progress></span>
                   <br><span class="sentiment" style="position:relative;top:3px"><paper-progress class="level" value="[[sentiment]]"></paper-progress></span>
                 </template>
@@ -308,7 +334,9 @@
           </div>
         </div>
         <div class="event-analysis-container">
-          <paper-button on-tap="analyze" id="analyze">Analyze now</paper-button>
+          <template is="dom-if" if="{{hasSentiment}}">
+            <paper-button on-tap="analyze" id="analyze">Analyze now</paper-button>
+          </template>
         </div>
       </div>
       <div class="bottom">
@@ -344,7 +372,9 @@
         sentiment: Number,
         sentimentString: String,
         sentimentIcon: String,
-        ready: { type: Boolean, notify: true, value: false }
+        hasSentiment: { type: Boolean, notify: true, value: false },
+        analyzing: { type: Boolean, notify: true, value: false },
+        analysisDone: { type: Boolean, notify: true, value: false }
       },
       observers: [
         'articleChanged(article, page)'
@@ -353,7 +383,7 @@
         if ((page == "articleView") && (article !== undefined))
         {
           var t = this;
-          t.set("ready", false);
+          t.set("hasSentiment", false);
           jQuery.get(server + "/api/1/event?uri=" + article.uri + "&desc=" + article.summary + "&title=" + article.title)
           .done(function(data) {
             console.log(data);
@@ -380,22 +410,28 @@
 
             t.set("bias", (data.objectivity) * 100);
             t.set("sentiment", Math.abs(data.polarity) < 0.1 ? 0 : (Math.abs(data.polarity) * 100));
-            t.set("ready", true);
+            t.set("hasSentiment", true);
           })
           .fail(function(data, data2, data3) {
             console.warn("Failed to get basic event data");
-            t.set("ready", false);
+            t.set("hasSentiment", false);
           });
         }
       },
       analyze: function() {
+        var t = this;
+        t.set("analyzing", true);
+        t.set("hasSentiment", false);
         jQuery.get(server + "/api/1/analyze?uri=" + this.article.uri)
         .done(function(data) {
-
-          // console.log(data.articles);
+          console.log(data.articles);
+          t.set("analyzing", false);
+          t.set("analysisDone", true);
         })
         .fail(function(data, data2, data3) {
           console.warn("Failed to start analysis");
+          t.set("analyzing", false);
+          t.set("hasSentiment", true);
         });
       },
       imageClass: function(image)
@@ -404,7 +440,7 @@
       },
       randomColor: function()
       {
-        var colors = [ "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#009688", "#43A047", "#039BE5", "#0097A7", "#EF6C00"];
+        var colors = [ "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#009688", "#43A047", "#039BE5", "#0097A7", "#EF6C00" ];
         return colors[Math.floor(Math.random()*colors.length)];
       },
       showLangTotal: function(articlesTotal, articlesLang)
