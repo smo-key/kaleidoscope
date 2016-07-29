@@ -3,6 +3,7 @@ var app = express();
 var request = require('request');
 var cache = require("./server_cache.js");
 var now = require("./server_now.js");
+var analysis = require("./server_analysis.js");
 
 /** DEBUGGING **/
 const debug = true;
@@ -73,8 +74,10 @@ app.get('/api/1/events', function(req, res) {
 
 app.get('/api/1/analyze', function(req, res) {
   if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
-  request(ml_server + '/ml/analyze/text_basic?text=' + req.query.text, function(error, response, body) {
-    res.status(200).json(body);
+  analysis.analyzeEvent(session, req.query.uri, req.query.lang || "eng", function(err, data)
+  {
+    var status = (err == null) ? 200 : 500;
+    res.status(status).json({ articles: data });
   });
 })
 

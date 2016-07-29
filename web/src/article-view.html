@@ -310,12 +310,12 @@
 
       },
       analyze: function() {
-        var text = this.article.summary;
-        console.log(text);
-        jQuery.get(server + "/api/1/analyze?text=" + text)
+        var uri = this.article.uri;
+        console.log(uri);
+        jQuery.get(server + "/api/1/analyze?uri=" + uri)
         .done(function(data) {
-          data = JSON.parse(data);
           console.log(data);
+          // console.log(data.articles);
         })
         .fail(function(data, data2, data3) {
           console.warn("Failed to start analysis");

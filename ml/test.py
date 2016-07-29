@@ -9,6 +9,8 @@ app = Flask(__name__)
 
 def analyzeText(text):
     blob = TextBlob(text)
+    print(text)
+    print(blob)
     # prob = cl.prob_classify(text)
     polarity = blob.sentiment.polarity
     subjectivity = blob.sentiment.subjectivity
