@@ -1,5 +1,8 @@
 var request = require('request');
 var async = require('async');
+var moment = require('moment');
+var textExtractor = require('unfluff');
+var _ = require('lodash');
 
 exports.startAnalyzeEvent = function(session, eventId, lang)
 {
@@ -27,17 +30,41 @@ getArticles = function(session, eventUri, lang, page, cb)
 analyzeArticle = function(article, cb)
 {
   //1. Get metadata
-  //2. Download article
-  //3. Scrape article for text
-  //4. Send text to Python server
-  //5. Return analysis data
+  var result = { };
+  result.url = article.url;
+  result.title = article.title;
+  result.sourceTitle = article.source.title;
+  result.sourceUrl = article.source.uri;
+  result.date = article.date + " " + article.time;
+  result.relevance = article.sim;
 
-  cb(null, article);
+  //2. Download article
+  var session = request.jar();
+  request.get(result.url, { jar: session }, function(error, response, body) {
+    if (error || response.statusCode != 200) {
+      console.log("ERROR: " + (error || response.statusCode || "Unknown!") + " " + result.url);
+      cb(null, null);
+    }
+    else {
+      // console.log("Extracting text from article...");
+      //3. Scrape article for text
+      data = textExtractor.lazy(body, 'en');
+      text = data.text();
+      // console.log(text);
+
+      //4. Send text to Python server
+
+
+      //5. Return analysis data
+      result.text = text;
+      cb(null, result);
+    }
+  });
 }
 
 exports.analyzeEvent = function(session, eventUri, lang, cb)
 {
-  const maxEventCount = 200;
+  const maxEventCount = 400;
   var totalPages = Math.floor(maxEventCount / 200);
   var pagesReceived = 0;
 
@@ -80,27 +107,34 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
             }
             else
             {
+              //De-dup based on article URLs
+              var uniqueArticles = _.uniqBy(articles, 'url');
+
               //Start mass analysis of all sources
-              console.log("Starting mass download...");
-              console.log(articles.length);
-              async.mapLimit(articles, 32, function(article, callback) {
+              console.log("Starting download of " + uniqueArticles.length + " articles...");
+              async.mapLimit(uniqueArticles, 32, function(article, callback) {
                 analyzeArticle(article, function(err, processed)
                 {
-                  if (err == null)
-                  {
-                    callback(null, processed);
-                  }
-                  else {
-                    callback(err, null);
-                  }
+                  callback(err, processed);
                 });
               }, function(err, processedArticles) {
                 if (err != null) {
                   cb(err, null);
                 }
                 else {
-                  console.log("Done processing articles!")
-                  cb(null, processedArticles);
+                  //Sort articles by time and remove null entries
+                  async.filter(processedArticles, function(article, callback) {
+                    callback(null, article != null);
+                  }, function(err, articles)
+                  {
+                    var sortedArticles = articles.sort(function(e1, e2) {
+                      return moment(e1.date).diff(moment(e2.date), 'days', true);
+                    });
+
+                    //Return articles
+                    console.log("Done processing articles!")
+                    cb(null, sortedArticles);
+                  });
                 }
               });
             }
