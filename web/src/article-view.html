@@ -136,6 +136,11 @@
         color: var(--paper-blue-500);
         font-size: 18px;
       }
+      div.event-stats .influence .sentiment
+      {
+        color: var(--paper-green-500);
+        font-size: 18px;
+      }
       div.event-stats .influence iron-icon
       {
         width: 28px;
@@ -160,6 +165,10 @@
       div.event-stats .influence .bias paper-progress
       {
         --paper-progress-active-color: var(--paper-blue-500);
+      }
+      div.event-stats .influence .sentiment paper-progress
+      {
+        --paper-progress-active-color: var(--paper-green-500);
       }
       div.event-stats .count
       {
@@ -274,10 +283,20 @@
         <div class="container">
           <div class="event-stats-container">
             <div class="influence">
-              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence: [[article.hotness]]<paper-progress class="level" value="[[article.hotness]]"></paper-progress></span><br>
-              <template is="dom-if" if="{{ready}}">
-                <span class="bias"><iron-icon icon="mdi:scale-balance"></iron-icon>Bias Guess: <strong>[[bias]]</strong><paper-progress class="level" value="[[biasLevel]]"></paper-progress></span>
-              </template>
+              <div style="float:left">
+                <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence: [[article.hotness]]</span>
+                <template is="dom-if" if="{{ready}}">
+                  <br><span class="bias"><iron-icon icon="mdi:scale-balance"></iron-icon>Objectivity Guess: <strong>[[biasString]]</strong></span>
+                  <br><span class="sentiment"><iron-icon icon="{{sentimentIcon}}"></iron-icon>Opinion Guess: <strong>[[sentimentString]]</strong></span>
+                </template>
+              </div>
+              <div style="float:left;position:relative;top: 3px">
+                <span class="hotness" style="position:relative;top:-3px"><paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
+                <template is="dom-if" if="{{ready}}">
+                  <br><span class="bias"><paper-progress class="level" value="[[bias]]"></paper-progress></span>
+                  <br><span class="sentiment" style="position:relative;top:3px"><paper-progress class="level" value="[[sentiment]]"></paper-progress></span>
+                </template>
+              </div>
             </div>
             <div class="count">
               <template is="dom-if" if="{{showLangTotal(article.articlesTotal, article.articlesLang)}}">
@@ -320,8 +339,11 @@
           notify: true
         },
         page: { type: String, notify: true },
-        bias: { type: String },
-        biasLevel: { type: Number, notify: true },
+        bias: Number,
+        biasString: String,
+        sentiment: Number,
+        sentimentString: String,
+        sentimentIcon: String,
         ready: { type: Boolean, notify: true, value: false }
       },
       observers: [
@@ -331,43 +353,38 @@
         if ((page == "articleView") && (article !== undefined))
         {
           var t = this;
-          jQuery.get(server + "/api/1/event?uri=" + article.uri + "&desc=" + article.summary)
+          t.set("ready", false);
+          jQuery.get(server + "/api/1/event?uri=" + article.uri + "&desc=" + article.summary + "&title=" + article.title)
           .done(function(data) {
             console.log(data);
 
-            var string = undefined;
-            if (data.objectivity >= 0.9)
-            {
-              string = "Objective";
-            }
-            else if (data.objectivity >= 0.65) {
-              string = "Likely Objective";
-            }
-            else if (data.polarity >= 0.5) {
-              string = "Positive";
-            }
-            else if (data.polarity <= -0.5) {
-              string = "Negative"
-            }
-            else if (data.polarity >= 0.1) {
-              string = "Slightly Positive"
-            }
-            else if (data.polarity <= -0.1) {
-              string = "Slightly Negative"
-            }
-            else if (data.objectivity > 0.1) {
-              string = "Potentially Biased";
-            }
-            else {
-              string = "Biased";
-            }
+            if (data.polarity > 0.7) { t.set("sentimentString", "Strongly Positive"); }
+            else if (data.polarity < -0.7) { t.set("sentimentString", "Strongly Negative"); }
+            else if (data.polarity > 0.5) { t.set("sentimentString", "Positive"); }
+            else if (data.polarity < -0.5) { t.set("sentimentString", "Negative"); }
+            else if (data.polarity > 0.25) { t.set("sentimentString", "Somewhat Positive"); }
+            else if (data.polarity < -0.25) { t.set("sentimentString", "Somewhat Negative"); }
+            else if (data.polarity > 0.1) { t.set("sentimentString", "Slightly Positive"); }
+            else if (data.polarity < -0.1) { t.set("sentimentString", "Slightly Negative"); }
+            else { t.set("sentimentString", "Neutral"); }
 
-            t.set("bias", string);
-            t.set("biasLevel", (1 - data.objectivity) * 100);
+            if (data.objectivity > 0.9) { t.set("biasString", "Objective"); }
+            else if (data.objectivity > 0.6) { t.set("biasString", "Likely Objective"); }
+            else if (data.objectivity < 0.4) { t.set("biasString", "Likely Biased"); }
+            else if (data.objectivity < 0.1) { t.set("biasString", "Biased"); }
+            else { t.set("biasString", "Potentially Biased"); }
+
+            if (data.polarity > 0.1) { t.set("sentimentIcon", "mdi:emoticon-happy"); }
+            else if (data.polarity < -0.1) { t.set("sentimentIcon", "mdi:emoticon-sad"); }
+            else { t.set("sentimentIcon", "mdi:emoticon-neutral"); }
+
+            t.set("bias", (data.objectivity) * 100);
+            t.set("sentiment", Math.abs(data.polarity) < 0.1 ? 0 : (Math.abs(data.polarity) * 100));
             t.set("ready", true);
           })
           .fail(function(data, data2, data3) {
             console.warn("Failed to get basic event data");
+            t.set("ready", false);
           });
         }
       },

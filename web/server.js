@@ -73,7 +73,7 @@ app.get('/api/1/events', function(req, res) {
 app.get('/api/1/event', function(req, res) {
   if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
   console.log("Get event data for event " + req.query.uri);
-  analysis.getEventData(session, req.query.uri, req.query.lang || "eng", req.query.desc, function(err, data)
+  analysis.getEventData(session, req.query.uri, req.query.lang || "eng", req.query.desc, req.query.title, function(err, data)
   {
     var status = (err == null) ? 200 : 500;
     res.status(status).json(data);

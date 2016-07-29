@@ -7,15 +7,14 @@ var _ = require('lodash');
 const maxEventCount = 200; //increments of 200
 const ml_server = "http://127.0.0.1:8002";
 
-exports.getEventData = function(session, eventId, lang, eventDescription, cb)
+exports.getEventData = function(session, eventId, lang, eventDescription, eventTitle, cb)
 {
   request.post(ml_server + '/ml/analyze/text_basic',
-  {form:{text: eventDescription}}, function(error, response, body) {
+  {form:{text: eventTitle + ".  " + eventDescription}}, function(error, response, body) {
     if (error || response.statusCode != 200) {
       cb(error, null);
     }
     else {
-      //5. Return analysis data
       var json = JSON.parse(body);
       var result = { };
       result.polarity = json.polarity;
