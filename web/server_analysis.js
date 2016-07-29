@@ -4,7 +4,33 @@ var moment = require('moment');
 var textExtractor = require('unfluff');
 var _ = require('lodash');
 
+const maxEventCount = 200; //increments of 200
+const ml_server = "http://127.0.0.1:8002";
+
+exports.getEventData = function(session, eventId, lang, eventDescription, cb)
+{
+  request.post(ml_server + '/ml/analyze/text_basic',
+  {form:{text: eventDescription}}, function(error, response, body) {
+    if (error || response.statusCode != 200) {
+      cb(error, null);
+    }
+    else {
+      //5. Return analysis data
+      var json = JSON.parse(body);
+      var result = { };
+      result.polarity = json.polarity;
+      result.objectivity = 1 - json.subjectivity;
+      cb(null, result);
+    }
+  });
+}
+
 exports.startAnalyzeEvent = function(session, eventId, lang)
+{
+
+}
+
+exports.getAnalysisStatus = function(eventUri)
 {
 
 }
@@ -53,18 +79,26 @@ analyzeArticle = function(article, cb)
       // console.log(text);
 
       //4. Send text to Python server
-
-
-      //5. Return analysis data
-      result.text = text;
-      cb(null, result);
+      request.post(ml_server + '/ml/analyze/text_basic',
+      {form:{text: text}}, function(error, response, body) {
+        if (error || response.statusCode != 200) {
+          cb(null, null);
+        }
+        else {
+          //5. Return analysis data
+          var json = JSON.parse(body);
+          result.polarity = json.polarity;
+          result.objectivity = 1 - json.subjectivity;
+          result.text = text;
+          cb(null, result);
+        }
+      });
     }
   });
 }
 
 exports.analyzeEvent = function(session, eventUri, lang, cb)
 {
-  const maxEventCount = 400;
   var totalPages = Math.floor(maxEventCount / 200);
   var pagesReceived = 0;
 
@@ -143,9 +177,4 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
       });
     }
   });
-}
-
-exports.getAnalysisStatus = function(eventUri)
-{
-
 }

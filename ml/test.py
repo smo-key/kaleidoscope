@@ -6,21 +6,20 @@ app = Flask(__name__)
 #Variables
 # cl = NaiveBayesClassifier()
 
-
 def analyzeText(text):
     blob = TextBlob(text)
-    print(text)
-    print(blob)
+    # print(text)
+    # print(blob)
     # prob = cl.prob_classify(text)
     polarity = blob.sentiment.polarity
     subjectivity = blob.sentiment.subjectivity
     return (polarity, subjectivity)
 
-@app.route('/ml/analyze/text_basic', methods=['GET'])
+@app.route('/ml/analyze/text_basic', methods=['POST'])
 def get_analyzeText():
-    text = request.args.get('text', '')
+    text = request.form['text']
     data = analyzeText(text)
-    response = jsonify(polarity=str(data[0]), subjectivity=str(data[1]))
+    response = jsonify(polarity=data[0], subjectivity=data[1])
     response.status_code = 200
     return response
 

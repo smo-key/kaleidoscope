@@ -9,8 +9,6 @@ var analysis = require("./server_analysis.js");
 const debug = true;
 cache.setDebug(debug);
 
-const ml_server = "http://127.0.0.1:8002"
-
 /** LOGIN TO PRIVATE API **/
 var session = request.jar();
 request.post('http://eventregistry.org/login',
@@ -68,6 +66,16 @@ app.get('/api/1/events', function(req, res) {
   {
     var status = data.status;
     delete data.status;
+    res.status(status).json(data);
+  });
+});
+
+app.get('/api/1/event', function(req, res) {
+  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  console.log("Get event data for event " + req.query.uri);
+  analysis.getEventData(session, req.query.uri, req.query.lang || "eng", req.query.desc, function(err, data)
+  {
+    var status = (err == null) ? 200 : 500;
     res.status(status).json(data);
   });
 });

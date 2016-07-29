@@ -126,9 +126,14 @@
         box-sizing: border-box;
         align-items: flex-start;
       }
-      div.event-stats .influence
+      div.event-stats .influence .hotness
       {
         color: var(--paper-red-500);
+        font-size: 18px;
+      }
+      div.event-stats .influence .bias
+      {
+        color: var(--paper-blue-500);
         font-size: 18px;
       }
       div.event-stats .influence iron-icon
@@ -144,10 +149,17 @@
         min-width: 0;
         width: 200px;
         display: inline-block;
-        --paper-progress-active-color: var(--paper-red-500);
         position: relative;
         top: -4px;
         margin-left: 12px;
+      }
+      div.event-stats .influence .hotness paper-progress
+      {
+        --paper-progress-active-color: var(--paper-red-500);
+      }
+      div.event-stats .influence .bias paper-progress
+      {
+        --paper-progress-active-color: var(--paper-blue-500);
       }
       div.event-stats .count
       {
@@ -262,7 +274,10 @@
         <div class="container">
           <div class="event-stats-container">
             <div class="influence">
-              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence: [[article.hotness]]<paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
+              <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon>Influence: [[article.hotness]]<paper-progress class="level" value="[[article.hotness]]"></paper-progress></span><br>
+              <template is="dom-if" if="{{ready}}">
+                <span class="bias"><iron-icon icon="mdi:scale-balance"></iron-icon>Bias Guess: <strong>[[bias]]</strong><paper-progress class="level" value="[[biasLevel]]"></paper-progress></span>
+              </template>
             </div>
             <div class="count">
               <template is="dom-if" if="{{showLangTotal(article.articlesTotal, article.articlesLang)}}">
@@ -304,17 +319,62 @@
           type: Object,
           notify: true
         },
-        page: { type: String, notify: true}
+        page: { type: String, notify: true },
+        bias: { type: String },
+        biasLevel: { type: Number, notify: true },
+        ready: { type: Boolean, notify: true, value: false }
       },
-      ready: function() {
+      observers: [
+        'articleChanged(article, page)'
+      ],
+      articleChanged: function(article, page) {
+        if ((page == "articleView") && (article !== undefined))
+        {
+          var t = this;
+          jQuery.get(server + "/api/1/event?uri=" + article.uri + "&desc=" + article.summary)
+          .done(function(data) {
+            console.log(data);
 
+            var string = undefined;
+            if (data.objectivity >= 0.9)
+            {
+              string = "Objective";
+            }
+            else if (data.objectivity >= 0.65) {
+              string = "Likely Objective";
+            }
+            else if (data.polarity >= 0.5) {
+              string = "Positive";
+            }
+            else if (data.polarity <= -0.5) {
+              string = "Negative"
+            }
+            else if (data.polarity >= 0.1) {
+              string = "Slightly Positive"
+            }
+            else if (data.polarity <= -0.1) {
+              string = "Slightly Negative"
+            }
+            else if (data.objectivity > 0.1) {
+              string = "Potentially Biased";
+            }
+            else {
+              string = "Biased";
+            }
+
+            t.set("bias", string);
+            t.set("biasLevel", (1 - data.objectivity) * 100);
+            t.set("ready", true);
+          })
+          .fail(function(data, data2, data3) {
+            console.warn("Failed to get basic event data");
+          });
+        }
       },
       analyze: function() {
-        var uri = this.article.uri;
-        console.log(uri);
-        jQuery.get(server + "/api/1/analyze?uri=" + uri)
+        jQuery.get(server + "/api/1/analyze?uri=" + this.article.uri)
         .done(function(data) {
-          console.log(data);
+
           // console.log(data.articles);
         })
         .fail(function(data, data2, data3) {
