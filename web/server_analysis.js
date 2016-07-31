@@ -7,6 +7,8 @@ var _ = require('lodash');
 const maxEventCount = 200; //increments of 200
 const ml_server = "http://127.0.0.1:8002";
 
+var analysis = { };
+
 exports.getEventData = function(session, eventId, lang, eventDescription, eventTitle, cb)
 {
   request.post(ml_server + '/ml/analyze/text_basic',
@@ -29,9 +31,9 @@ exports.startAnalyzeEvent = function(session, eventId, lang)
 
 }
 
-exports.getAnalysisStatus = function(eventUri)
+exports.getAnalysisStatus = function(eventUri, cb)
 {
-
+  cb(null, analysis[eventUri] || null);
 }
 
 getArticles = function(session, eventUri, lang, page, cb)
@@ -103,6 +105,8 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
 
   //Get first event
   console.log("Starting event analysis...");
+  analysis[eventUri] = { status: "Downloading article list...", done: -1 };
+
   getArticles(session, eventUri, lang, 1, function(err, json)
   {
     if (err != null) {
@@ -111,7 +115,7 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
     else
     {
       var articles = json.results;
-      totalPages = Math.floor(Math.min(maxEventCount, json.totalResults) / 200);
+      totalPages = Math.ceil(Math.min(maxEventCount, json.totalResults) / 200);
       pagesReceived++;
       async.doWhilst(function(callback) {
         if (pagesReceived < totalPages)
@@ -145,9 +149,12 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
 
               //Start mass analysis of all sources
               console.log("Starting download of " + uniqueArticles.length + " articles...");
+              analysis[eventUri] = { status: "Analyzing " + uniqueArticles.length + " articles...", done: 0 };
+              var articlesDone = 0;
               async.mapLimit(uniqueArticles, 32, function(article, callback) {
                 analyzeArticle(article, function(err, processed)
                 {
+                  analysis[eventUri] = { status: "Analyzing " + uniqueArticles.length + " articles...", done: (articlesDone++)/uniqueArticles.length*99 };
                   callback(err, processed);
                 });
               }, function(err, processedArticles) {
@@ -156,16 +163,18 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
                 }
                 else {
                   //Sort articles by time and remove null entries
+                  analysis[eventUri] = { status: "Finishing up...", done: 100 };
                   async.filter(processedArticles, function(article, callback) {
                     callback(null, article != null);
                   }, function(err, articles)
                   {
                     var sortedArticles = articles.sort(function(e1, e2) {
                       return moment(e1.date).diff(moment(e2.date), 'days', true);
-                    });
+                    })
 
                     //Return articles
-                    console.log("Done processing articles!")
+                    console.log("Done processing articles!");
+                    delete analysis[eventUri];
                     cb(null, sortedArticles);
                   });
                 }

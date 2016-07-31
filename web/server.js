@@ -4,6 +4,7 @@ var request = require('request');
 var cache = require("./server_cache.js");
 var now = require("./server_now.js");
 var analysis = require("./server_analysis.js");
+var util = require("./server_util.js");
 
 /** DEBUGGING **/
 const debug = true;
@@ -86,6 +87,25 @@ app.get('/api/1/analyze', function(req, res) {
   {
     var status = (err == null) ? 200 : 500;
     res.status(status).json({ articles: data });
+  });
+})
+
+app.get('/api/1/analyze/status', function(req, res) {
+  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  analysis.getAnalysisStatus(req.query.uri, function(err, data)
+  {
+    var status = (err == null) ? 200 : 500;
+    res.status(status).json(data);
+  });
+})
+
+app.get('/api/1/util/imagecolor', function(req, res) {
+  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  util.getImageColor(req.query.url, function(err, data)
+  {
+    console.log(data);
+    var status = (err == null) ? 200 : 500;
+    res.status(status).json(data);
   });
 })
 

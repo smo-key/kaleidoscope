@@ -28,6 +28,3 @@ def get_analyzeText():
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8002)
-
-
-# blob = TextBlob("Three days earlier, Johnson had lashed out at Obama on Fox News, claiming that White House actions, including pushes for police reform by the U.S. Department of Justice and the president’s \"refusal to condemn movements like Black Lives Matter\" had \"led directly to the climate that ... made Dallas possible.\"")

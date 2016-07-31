@@ -34,7 +34,9 @@
         bottom: 0;
         right: 0;
         z-index: 10;
-        overflow-y:scroll;
+        overflow-y: scroll;
+
+        --view-progress-color: var(--paper-purple-a700);
       }
       h1, h2, h3, h4, h5
       {
@@ -256,12 +258,13 @@
       div.event-image paper-progress.analyzing
       {
         position: absolute;
-        top: 346px;
+        top: 342px;
         left: 0;
         right: 0;
         width: 100%;
-        --paper-progress-active-color: var(--paper-green-500);
-        --paper-progress-container-color: transparent;
+        --paper-progress-active-color: var(--view-progress-color);
+        --paper-progress-container-color: var(--paper-grey-500);
+        --paper-progress-height: 8px;
       }
     </style>
 
@@ -290,12 +293,13 @@
             </div>
           </div>
         </div>
-        <paper-progress class="analyzing" indeterminate hidden$={{!analyzing}}></paper-progress>
+        <paper-progress class="analyzing" value="[[analysisValue]]" indeterminate$="{{isProgressIndeterminate(analysisValue)}}" hidden$={{!analyzing}}></paper-progress>
+        <!-- hidden$={{!analyzing}} -->
       </div>
       <div class="event-description">
         <div class="container">
-          [[article.summary]]
-          <br>
+          <div hidden$={{analyzing}} style="width:100%;display:block">[[article.summary]]</div>
+          <div hidden$={{!analyzing}} style="width:100%;display:block">[[analysisState]]</div>
           <!-- <div class="event-description-buttons">
             <paper-button id="read">Read Article</paper-button>
           </div> -->
@@ -315,10 +319,18 @@
                   <br><span class="bias grey"><iron-icon icon="mdi:scale-balance"></iron-icon>Objectivity: Analyzing...</span>
                   <br><span class="sentiment grey"><iron-icon icon="{{sentimentIcon}}"></iron-icon>Opinion: Analyzing...</span>
                 </template>
+                <template is="dom-if" if="{{analysisDone}}">
+                  <br><span class="bias"><iron-icon icon="mdi:scale-balance"></iron-icon>Objectivity: <strong>[[biasString]]</strong></span>
+                  <br><span class="sentiment"><iron-icon icon="{{sentimentIcon}}"></iron-icon>Opinion: <strong>[[sentimentString]]</strong></span>
+                </template>
               </div>
               <div style="float:left;position:relative;top:3px">
                 <span class="hotness" style="position:relative;top:-3px"><paper-progress class="level" value="[[article.hotness]]"></paper-progress></span>
                 <template is="dom-if" if="{{hasSentiment}}">
+                  <br><span class="bias"><paper-progress class="level" value="[[bias]]"></paper-progress></span>
+                  <br><span class="sentiment" style="position:relative;top:3px"><paper-progress class="level" value="[[sentiment]]"></paper-progress></span>
+                </template>
+                <template is="dom-if" if="{{analysisDone}}">
                   <br><span class="bias"><paper-progress class="level" value="[[bias]]"></paper-progress></span>
                   <br><span class="sentiment" style="position:relative;top:3px"><paper-progress class="level" value="[[sentiment]]"></paper-progress></span>
                 </template>
@@ -335,7 +347,7 @@
         </div>
         <div class="event-analysis-container">
           <template is="dom-if" if="{{hasSentiment}}">
-            <paper-button on-tap="analyze" id="analyze">Analyze now</paper-button>
+            <paper-button on-tap="analyze" id="analyze" $disabled="{{hasStartedAnalysis}}" $hidden="{{analysisDone}}">Analyze now</paper-button>
           </template>
         </div>
       </div>
@@ -351,7 +363,6 @@
         </div>
       </div>
     </div>
-
 
   </template>
 
@@ -374,42 +385,59 @@
         sentimentIcon: String,
         hasSentiment: { type: Boolean, notify: true, value: false },
         analyzing: { type: Boolean, notify: true, value: false },
-        analysisDone: { type: Boolean, notify: true, value: false }
+        analysisDone: { type: Boolean, notify: true, value: false },
+        hasStartedAnalysis: { type: Boolean, notify: true, value: false },
+        analysisState: String,
+        analysisValue: { type: Number, notify: true, value: -1 },
+      },
+      isProgressIndeterminate: function(analysisValue)
+      {
+        return analysisValue <= -1;
       },
       observers: [
         'articleChanged(article, page)'
       ],
+      updateSentiment: function(data) {
+        data.polarity*=2;
+
+        if (data.polarity > 0.7) { this.set("sentimentString", "Strongly Positive"); }
+        else if (data.polarity < -0.7) { this.set("sentimentString", "Strongly Negative"); }
+        else if (data.polarity > 0.5) { this.set("sentimentString", "Positive"); }
+        else if (data.polarity < -0.5) { this.set("sentimentString", "Negative"); }
+        else if (data.polarity > 0.25) { this.set("sentimentString", "Somewhat Positive"); }
+        else if (data.polarity < -0.25) { this.set("sentimentString", "Somewhat Negative"); }
+        else if (data.polarity > 0.1) { this.set("sentimentString", "Slightly Positive"); }
+        else if (data.polarity < -0.1) { this.set("sentimentString", "Slightly Negative"); }
+        else if (Math.abs(data.polarity) > 0.01) { this.set("sentimentString", "Mostly Neutral")}
+        else { this.set("sentimentString", "Neutral"); }
+
+        if (data.objectivity > 0.85) { this.set("biasString", "Objective"); }
+        else if (data.objectivity > 0.6) { this.set("biasString", "Likely Objective"); }
+        else if (data.objectivity < 0.15) { this.set("biasString", "Biased"); }
+        else if (data.objectivity < 0.4) { this.set("biasString", "Likely Biased"); }
+        else { this.set("biasString", "Potentially Biased"); }
+
+        if (data.polarity > 0.1) { this.set("sentimentIcon", "mdi:emoticon-happy"); }
+        else if (data.polarity < -0.1) { this.set("sentimentIcon", "mdi:emoticon-sad"); }
+        else { this.set("sentimentIcon", "mdi:emoticon-neutral"); }
+
+        this.set("bias", data.objectivity * 100);
+        this.set("sentiment", data.polarity * 100);
+      },
       articleChanged: function(article, page) {
         if ((page == "articleView") && (article !== undefined))
         {
           var t = this;
+          //Update sentiment data
           t.set("hasSentiment", false);
+          t.set("analysisDone", false);
+          t.set("hasStartedAnalysis", false);
+          t.set("analysisState", "Starting analysis...");
+          t.set("analysisValue", -1);
           jQuery.get(server + "/api/1/event?uri=" + article.uri + "&desc=" + article.summary + "&title=" + article.title)
           .done(function(data) {
             console.log(data);
-
-            if (data.polarity > 0.7) { t.set("sentimentString", "Strongly Positive"); }
-            else if (data.polarity < -0.7) { t.set("sentimentString", "Strongly Negative"); }
-            else if (data.polarity > 0.5) { t.set("sentimentString", "Positive"); }
-            else if (data.polarity < -0.5) { t.set("sentimentString", "Negative"); }
-            else if (data.polarity > 0.25) { t.set("sentimentString", "Somewhat Positive"); }
-            else if (data.polarity < -0.25) { t.set("sentimentString", "Somewhat Negative"); }
-            else if (data.polarity > 0.1) { t.set("sentimentString", "Slightly Positive"); }
-            else if (data.polarity < -0.1) { t.set("sentimentString", "Slightly Negative"); }
-            else { t.set("sentimentString", "Neutral"); }
-
-            if (data.objectivity > 0.9) { t.set("biasString", "Objective"); }
-            else if (data.objectivity > 0.6) { t.set("biasString", "Likely Objective"); }
-            else if (data.objectivity < 0.4) { t.set("biasString", "Likely Biased"); }
-            else if (data.objectivity < 0.1) { t.set("biasString", "Biased"); }
-            else { t.set("biasString", "Potentially Biased"); }
-
-            if (data.polarity > 0.1) { t.set("sentimentIcon", "mdi:emoticon-happy"); }
-            else if (data.polarity < -0.1) { t.set("sentimentIcon", "mdi:emoticon-sad"); }
-            else { t.set("sentimentIcon", "mdi:emoticon-neutral"); }
-
-            t.set("bias", (data.objectivity) * 100);
-            t.set("sentiment", Math.abs(data.polarity) < 0.1 ? 0 : (Math.abs(data.polarity) * 100));
+            t.updateSentiment(data);
             t.set("hasSentiment", true);
           })
           .fail(function(data, data2, data3) {
@@ -420,19 +448,72 @@
       },
       analyze: function() {
         var t = this;
+
+        //Calculate image color
+        jQuery.get(server + "/api/1/util/imagecolor?url=" + this.article.image)
+        .done(function(data) {
+          t.customStyle['--view-progress-color'] = data.color;
+          t.updateStyles(); //Polymer.updateStyles()
+        })
+        .fail(function() {
+          console.warn("Could not get image color!");
+          t.customStyle['--view-progress-color'] = t.randomColor();
+          t.updateStyles(); //Polymer.updateStyles()
+        });
+
         t.set("analyzing", true);
+        t.set("hasStartedAnalysis", true);
         t.set("hasSentiment", false);
+        t.set("analysisState", "Starting analysis...");
+        t.getAnalysisStatusUpdate();
         jQuery.get(server + "/api/1/analyze?uri=" + this.article.uri)
         .done(function(data) {
           console.log(data.articles);
           t.set("analyzing", false);
+
+          //Get sentiment data (compute average)
+          var sumPolarity = 0;
+          var sumObjectivity = 0;
+          for (var i=0; i<data.articles.length; i++)
+          {
+            sumPolarity += data.articles[i].polarity;
+            sumObjectivity += data.articles[i].objectivity;
+          }
+          t.updateSentiment({objectivity: sumObjectivity / data.articles.length,
+             polarity: sumPolarity / data.articles.length });
           t.set("analysisDone", true);
         })
         .fail(function(data, data2, data3) {
           console.warn("Failed to start analysis");
           t.set("analyzing", false);
           t.set("hasSentiment", true);
+          t.set("hasStartedAnalysis", false);
         });
+      },
+      getAnalysisStatusUpdate: function()
+      {
+        var t = this;
+        setTimeout(function() {
+          jQuery.get(server + "/api/1/analyze/status?uri=" + t.article.uri)
+          .done(function(data) {
+            if (t.analyzing)
+            {
+              if (data != null)
+              {
+                t.set("analysisState", data.status);
+                t.set("analysisValue", data.done);
+              }
+              t.getAnalysisStatusUpdate();
+            }
+          })
+          .fail(function() {
+            console.warn("Failed to get analysis status update");
+            if (t.analyzing)
+            {
+              t.getAnalysisStatusUpdate();
+            }
+          });
+        }, 2000);
       },
       imageClass: function(image)
       {
