@@ -267,6 +267,75 @@
         --paper-progress-container-color: var(--paper-grey-500);
         --paper-progress-height: 8px;
       }
+
+      .sort {
+        color: var(--paper-grey-900);
+        float:right;
+        display:inline-block;
+      }
+      .sort-heading
+      {
+        float:left;
+        display:inline-block;
+        font-size: 18px;
+        color: var(--paper-grey-700);
+        position: relative;
+        top: 8px;
+      }
+      .sort .sort-text
+      {
+        font-size: 16px;
+        position: relative;
+        top: 2px;
+        margin-right: 8px;
+      }
+      hr.sort-hr
+      {
+        border-top: 2px solid var(--paper-grey-300);
+        clear: both;
+        margin-bottom: 8px;
+      }
+      .sort paper-icon-button
+      {
+        border-radius: 50%;
+        transition: color 0.4s, background-color 0.4s;
+      }
+      .sort paper-icon-button[selected]
+      {
+        color: #fff;
+      }
+      .sort .sort-date
+      {
+        color: var(--paper-grey-900);
+      }
+      .sort .sort-date[selected]
+      {
+        background-color: var(--paper-grey-900);
+      }
+      .sort .sort-hotness
+      {
+        color: var(--paper-red-600);
+      }
+      .sort .sort-hotness[selected]
+      {
+        background-color: var(--paper-red-600);
+      }
+      .sort .sort-objectivity
+      {
+        color: var(--paper-blue-600);
+      }
+      .sort .sort-objectivity[selected]
+      {
+        background-color: var(--paper-blue-600);
+      }
+      .sort .sort-polarity
+      {
+        color: var(--paper-green-600);
+      }
+      .sort .sort-polarity[selected]
+      {
+        background-color: var(--paper-green-600);
+      }
     </style>
 
     <paper-toolbar>
@@ -350,8 +419,19 @@
           <template is="dom-if" if="{{hasSentiment}}">
             <paper-button on-tap="analyze" id="analyze" $disabled="{{hasStartedAnalysis}}" $hidden="{{analysisDone}}">Analyze now</paper-button>
           </template>
-          <div class="container">
-            <template is="dom-repeat" items="{{articles}}">
+          <div class="container" style="padding-top:16px">
+            <span hidden$="{{!analysisDone}}">
+              <span class="sort-heading">Articles</span>
+              <div class="sort">
+                <span class="sort-text">Sort by</span>
+                <paper-icon-button id="sortdate" on-tap="sortArticles" class="sort-date" selected$="{{isSort(sort, 'date')}}" icon="mdi:clock" toggles></paper-icon-button>
+                <paper-icon-button id="sorthotness" on-tap="sortArticles" class="sort-hotness" selected$="{{isSort(sort, 'hotness')}}" icon="mdi:fire" toggles></paper-icon-button>
+                <paper-icon-button id="sortobjectivity" on-tap="sortArticles" class="sort-objectivity" selected$="{{isSort(sort, 'objectivity')}}" icon="mdi:scale-balance" toggles></paper-icon-button>
+                <paper-icon-button id="sortpolarity" on-tap="sortArticles" class="sort-polarity" selected$="{{isSort(sort, 'polarity')}}" icon="mdi:emoticon-happy" toggles></paper-icon-button>
+              </div>
+              <hr class="sort-hr">
+            </span>
+            <template is="dom-repeat" items="{{articles}}" id="articlerepeater" observe="hotness objectivity polarity">
               <paper-article article="{{item}}"></paper-article>
             </template>
           </div>
@@ -374,6 +454,7 @@
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
   <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/lib/moment/min/moment.min.js"></script>
   <script>
     Polymer({
       is: 'article-view',
@@ -384,6 +465,7 @@
           notify: true
         },
         page: { type: String, notify: true },
+        sort: { type: String, notify: true, value: "date" },
         bias: Number,
         biasString: String,
         sentiment: Number,
@@ -400,9 +482,48 @@
       {
         return analysisValue <= -1;
       },
+      listeners: {
+        'sortdate.tap': 'sortArticles',
+        'sortobjectivity.tap': 'sortArticles',
+        'sorthotness.tap': 'sortArticles',
+        'sortpolarity.tap': 'sortArticles'
+      },
       observers: [
         'articleChanged(article, page)'
       ],
+      sortArticles: function(e)
+      {
+        var by = (e.target.id == "icon") ? e.target.parentNode.id.substring(4) : e.target.id.substring(4);
+        var articles = this.articles;
+        this.set("sort", by);
+        // console.log(by);
+        // console.log(this.articles);
+        // console.log(this.sort);
+        if (this.articles !== undefined)
+        {
+          if (by.indexOf("date") > -1)
+          {
+            console.log("GET ARTICLES BY DATE!");
+            var sortedArticles = articles.sort(function(a1, a2) {
+              return moment(a1.date).diff(moment(a2.date), 'days', true);
+            });
+            this.set("articles", sortedArticles);
+            this.$.articlerepeater.render();
+          }
+          else
+          {
+            var sortedArticles = articles.sort(function(a1, a2) {
+              return a2[by] - a1[by];
+            });
+            this.set("articles", sortedArticles);
+            this.$.articlerepeater.render();
+          }
+        }
+      },
+      isSort: function(sort, by)
+      {
+        return sort == by;
+      },
       updateSentiment: function(data) {
         data.polarity*=2;
 
@@ -440,6 +561,7 @@
           t.set("hasStartedAnalysis", false);
           t.set("analysisState", "Starting analysis...");
           t.set("analysisValue", -1);
+          t.set("sort", "date");
           jQuery.get(server + "/api/1/event?uri=" + article.uri + "&desc=" + article.summary + "&title=" + article.title)
           .done(function(data) {
             console.log(data);
@@ -488,6 +610,7 @@
           t.updateSentiment({objectivity: sumObjectivity / data.articles.length,
              polarity: sumPolarity / data.articles.length });
           t.set("articles", data.articles);
+          // t.set("articlesByDate", data.articles);
           t.set("analysisDone", true);
         })
         .fail(function(data, data2, data3) {
