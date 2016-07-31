@@ -4,7 +4,8 @@ var moment = require('moment');
 var textExtractor = require('unfluff');
 var _ = require('lodash');
 
-const maxEventCount = 200; //increments of 200
+const maxEventCount = 100; //increments of eventsInSingleRequest
+const eventsInSingleRequest = 100;
 const ml_server = "http://127.0.0.1:8002";
 
 var analysis = { };
@@ -38,17 +39,12 @@ exports.getAnalysisStatus = function(eventUri, cb)
 
 getArticles = function(session, eventUri, lang, page, cb)
 {
-  request('http://eventregistry.org/json/event?eventUri=' + eventUri + '&action=getEvent&resultType=articles&articlesLang=' + lang + '&articlesSortBy=socialScore&articlesCount=200&articlesIncludeArticleImage=true&articlesIncludeArticleSocialScore=true&articlesPage=' + page, { jar: session }, function(error, response, body) { //sortBy=cosSim
+  request('http://eventregistry.org/json/event?eventUri=' + eventUri + '&action=getEvent&resultType=articles&articlesLang=' + lang + '&articlesSortBy=cosSim&articlesCount='+ eventsInSingleRequest + '&articlesIncludeArticleImage=true&articlesIncludeArticleSocialScore=true&articlesPage=' + page, { jar: session }, function(error, response, body) { //sortBy=cosSim
     if (error || response.statusCode != 200) {
-      console.error(body);
-      console.error(error);
       cb(error, null);
     }
     else {
       var json = JSON.parse(body);
-      console.log("GET Article List for event")
-      console.log(json);
-      console.log(json[eventUri].articles.results.length);
       cb(null, json[eventUri].articles);
     }
   });
@@ -143,7 +139,6 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
         else
         {
           //Concat all results
-          console.log(articles.length);
           console.log("Concatenating results...");
           async.eachSeries(results, function(result, callback) {
             articles = articles.concat(result);
@@ -159,12 +154,12 @@ exports.analyzeEvent = function(session, eventUri, lang, cb)
 
               //Start mass analysis of all sources
               console.log("Starting download of " + uniqueArticles.length + " articles...");
-              analysis[eventUri] = { status: "Analyzing " + uniqueArticles.length + " articles...", done: 0 };
+              analysis[eventUri] = { status: "Analyzing articles...", done: 0 };
               var articlesDone = 0;
               async.mapLimit(uniqueArticles, 32, function(article, callback) {
                 analyzeArticle(article, function(err, processed)
                 {
-                  analysis[eventUri] = { status: "Analyzing " + uniqueArticles.length + " articles...", done: (articlesDone++)/uniqueArticles.length*99 };
+                  analysis[eventUri] = { status: "Analyzing articles...", done: (articlesDone++)/uniqueArticles.length*99 };
                   callback(err, processed);
                 });
               }, function(err, processedArticles) {

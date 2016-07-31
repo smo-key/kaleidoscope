@@ -3,6 +3,8 @@ var async = require('async');
 var moment = require('moment');
 var _ = require('lodash');
 
+const eventCountPerRequest = 50;
+
 function parseSummary(summary, cb)
 {
   if (summary != null)
@@ -47,7 +49,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
   /**For the most part, getting first 50 articles by relevance is pretty good - however, for larger items, also get the most *recent* articles **/
   async.parallel([
     function(callback) {
-      request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount=100&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=rel&eventsPage=1', { jar: session }, function(error, response, body) {
+      request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount='+ eventCountPerRequest + '&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=rel&eventsPage=1', { jar: session }, function(error, response, body) {
         if (error) callback(error, [ ]);
         else if (JSON.parse(body).error !== undefined) {
           callback(null, [ ]);
@@ -58,7 +60,7 @@ exports.getEvents = function(session, conceptUri, lang, cb)
       });
     },
     function(callback) {
-      request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount=100&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=date&eventsPage=1', { jar: session }, function(error, response, body) {
+      request('http://eventregistry.org/json/event?action=getEvents&resultType=events&eventsConceptLang=eng&eventsCount='+ eventCountPerRequest + '&eventsEventImageCount=1&minArticlesInEvent=10&eventsIncludeEventSocialScore=true&conceptUri=' + conceptUri + '&eventsSortBy=date&eventsPage=1', { jar: session }, function(error, response, body) {
         if (error) callback(error, [ ]);
         else if (JSON.parse(body).error !== undefined) {
           callback(null, [ ]);

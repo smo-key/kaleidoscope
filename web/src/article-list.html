@@ -310,7 +310,7 @@
           }
         })
         .fail(function() {
-          console.warn("Failed to get trending suggestions");
+          warn("Failed to get trending suggestions");
         })
         .always(function() {
           placeholderLoop();
@@ -342,17 +342,7 @@
         //Key enter
         else if (event.which == 13) {
           var suggestions = jQuery('#searchsuggest');
-          if (!suggestions.is(':visible'))
-          {
-            if (jQuery.trim(jQuery("#search-event input").val()).length > 0)
-            {
-              //Search now
-              console.log("Searching for " + jQuery("#search-event input").val());
-              // this.set("uri", jQuery("#search-event input").attr("uri"));
-              console.log(this.uri);
-            }
-          }
-          else
+          if (suggestions.is(':visible'))
           {
             //Activate search suggestions
             jQuery('#searchsuggest paper-item:nth-child(' + (jQuery('#searchsuggest').prop("selected") + 1) + ')').click();
@@ -396,7 +386,6 @@
               jQuery.get("http://eventregistry.org/json/suggestConcepts?prefix=" + encodeURIComponent(text) + "&lang=eng&source=concepts&source=conceptClass")
               .done(function(data) {
                 data = JSON.parse(data);
-                console.log(data);
                 jQuery('#searchsuggest').remove();
                 var html = "<paper-listbox id='searchsuggest' selected='0'>";
                 for (var i=0; i<((data.length > 5) ? 5 : data.length); i++)
@@ -460,7 +449,6 @@
       uriChanged: function(uri, search, domready)
       {
         var t = this;
-        console.log("uriChanged: " + uri + " " + search);
         if (uri.length > 0 && (uri != lastUri))
         {
           lastUri = uri;
@@ -486,7 +474,7 @@
             }
           })
           .fail(function(data, data2, data3) {
-            console.warn("Failed to get events for query '" + search + "'");
+            warn("Failed to get events for query '" + search + "'");
             jQuery("#search-event").prop("disabled", false);
             jQuery("paper-progress.loading").prop("hidden", true);
             t.set('events', [ ]);

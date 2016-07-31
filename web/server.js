@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var request = require('request');
+var morgan = require('morgan')
 var cache = require("./server_cache.js");
 var now = require("./server_now.js");
 var analysis = require("./server_analysis.js");
@@ -9,6 +10,7 @@ var util = require("./server_util.js");
 /** DEBUGGING **/
 const debug = true;
 cache.setDebug(debug);
+app.use(morgan('dev'));
 
 /** LOGIN TO PRIVATE API **/
 var session = request.jar();

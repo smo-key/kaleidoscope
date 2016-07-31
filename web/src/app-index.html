@@ -80,7 +80,6 @@
       },
       keepArticleList: function(page)
       {
-        // return (page == "articleList");
         return ((page == "articleList") || (page == "articleView"));
       },
       articleListScrollability: function(page)
@@ -88,21 +87,19 @@
         return (page == "articleList") ? "" : "overflow-y: visible";
       },
       ready: function() {
-        var article = { title: "Watch the trailer for 'Narcos' season 2 | NME.COM", date: "just now", summary: "The second season of Netflix's Narcos is launching on September 2nd, and today we got our first look at what the story's about. The trailer sets up an epic manhunt, with DEA agents Steve Murphy (Boyd Holbrook) and Javier Peña (Pablo Pascal) on the front lines. Holbrook's voiceover -- \"this isn't a manhunt, it's an invasion\" -- implies the season will take us even deeper into the United States' infamous War on Drugs. In fact it seems like a season of more: more gunfire, more lackeys getting...", location: "", hotness: 77, articlesLang: 29, articlesTotal: 46, image: "http://cdn4.img.sputniknews.com/images/104328/21/1043282180.jpg", uri: 4651237, languages: 3 };
-        this.set("article", article);
+        // var article = { title: "Watch the trailer for 'Narcos' season 2 | NME.COM", date: "just now", summary: "The second season of Netflix's Narcos is launching on September 2nd, and today we got our first look at what the story's about. The trailer sets up an epic manhunt, with DEA agents Steve Murphy (Boyd Holbrook) and Javier Peña (Pablo Pascal) on the front lines. Holbrook's voiceover -- \"this isn't a manhunt, it's an invasion\" -- implies the season will take us even deeper into the United States' infamous War on Drugs. In fact it seems like a season of more: more gunfire, more lackeys getting...", location: "", hotness: 77, articlesLang: 29, articlesTotal: 46, image: "http://cdn4.img.sputniknews.com/images/104328/21/1043282180.jpg", uri: 4651237, languages: 3 };
+        // this.set("article", article);
 
-        // this.set("page", "conceptSearch");
-        this.set("page", "articleView");
+        this.set("page", "conceptSearch");
+        // this.set("page", "articleView");
       },
       pageChanged: function(newPage) {
-        console.log("Page changed to " + newPage);
         var pages = this.pages;
         for (var key in this.pages) {
           if( this.pages.hasOwnProperty(key) ) {
             this.set("pages." + key, (key == newPage));
           }
         }
-        //this.set("pages", {conceptSearch: true, articleList: false});
       }
     });
   </script>

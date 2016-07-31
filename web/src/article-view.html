@@ -496,14 +496,10 @@
         var by = (e.target.id == "icon") ? e.target.parentNode.id.substring(4) : e.target.id.substring(4);
         var articles = this.articles;
         this.set("sort", by);
-        // console.log(by);
-        // console.log(this.articles);
-        // console.log(this.sort);
         if (this.articles !== undefined)
         {
           if (by.indexOf("date") > -1)
           {
-            console.log("GET ARTICLES BY DATE!");
             var sortedArticles = articles.sort(function(a1, a2) {
               return moment(a1.date).diff(moment(a2.date), 'days', true);
             });
@@ -562,9 +558,10 @@
           t.set("analysisState", "Starting analysis...");
           t.set("analysisValue", -1);
           t.set("sort", "date");
+          t.set("articles", [ ]);
+          t.$.articlerepeater.render();
           jQuery.get(server + "/api/1/event?uri=" + article.uri + "&desc=" + article.summary + "&title=" + article.title)
           .done(function(data) {
-            console.log(data);
             t.updateSentiment(data);
             t.set("hasSentiment", true);
           })
@@ -596,7 +593,6 @@
         t.getAnalysisStatusUpdate();
         jQuery.get(server + "/api/1/analyze?uri=" + this.article.uri)
         .done(function(data) {
-          console.log(data.articles);
           t.set("analyzing", false);
 
           //Get sentiment data (compute average)
