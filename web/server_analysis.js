@@ -67,7 +67,7 @@ analyzeArticle = function(article, cb)
 
   //2. Download article
   var session = request.jar();
-  request.get(result.url, { jar: session }, function(error, response, body) {
+  request.get(result.url, { jar: session, timeout: 10000 }, function(error, response, body) {
     if (error || response.statusCode != 200) {
       console.log("ERROR: " + (error || response.statusCode || "Unknown!") + " " + result.url);
       cb(null, null);
