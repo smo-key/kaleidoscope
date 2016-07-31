@@ -80,6 +80,7 @@
       },
       keepArticleList: function(page)
       {
+        // return (page == "articleList");
         return ((page == "articleList") || (page == "articleView"));
       },
       articleListScrollability: function(page)
@@ -87,11 +88,11 @@
         return (page == "articleList") ? "" : "overflow-y: visible";
       },
       ready: function() {
-        // var article = { title: "Turkey to disband elite presidential guard unit", date: "3 days ago", location: "Constantinople, Turkey", summary: "Turkish authorities have arrested more than 13,000 people believed to be tied to the coup attempt and have gutted the country's civil services sector suspending over 60,000 educators, judges and police.", hotness: 83, articleCount: 605, image: "http://cdn4.img.sputniknews.com/images/104328/21/1043282180.jpg", uri: 12345678, languages: 6 };
-        // this.set("article", article);
+        var article = { title: "Watch the trailer for 'Narcos' season 2 | NME.COM", date: "just now", summary: "The second season of Netflix's Narcos is launching on September 2nd, and today we got our first look at what the story's about. The trailer sets up an epic manhunt, with DEA agents Steve Murphy (Boyd Holbrook) and Javier Peña (Pablo Pascal) on the front lines. Holbrook's voiceover -- \"this isn't a manhunt, it's an invasion\" -- implies the season will take us even deeper into the United States' infamous War on Drugs. In fact it seems like a season of more: more gunfire, more lackeys getting...", location: "", hotness: 77, articlesLang: 29, articlesTotal: 46, image: "http://cdn4.img.sputniknews.com/images/104328/21/1043282180.jpg", uri: 4651237, languages: 3 };
+        this.set("article", article);
 
-        this.set("page", "conceptSearch");
-        // this.set("page", "articleView");
+        // this.set("page", "conceptSearch");
+        this.set("page", "articleView");
       },
       pageChanged: function(newPage) {
         console.log("Page changed to " + newPage);

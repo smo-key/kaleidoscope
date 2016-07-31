@@ -1,0 +1,230 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/paper-styles/color.html">
+<link rel="import" href="../lib/paper-button/paper-button.html">
+<link rel="import" href="../lib/paper-card/paper-card.html">
+<link rel="import" href="../lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../lib/paper-progress/paper-progress.html">
+<link rel="import" href="../lib/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../lib/iron-icon/iron-icon.html">
+<link rel="import" href="mdi.html">
+
+<dom-module id="paper-article">
+  <template>
+    <style>
+      :host {
+        color: #000;
+        padding: 0!important;
+        cursor: pointer;
+        transition: box-shadow 0.4s;
+        width: 100%;
+        display: inline-block;
+        margin: 12px 0;
+        height: 160px;
+      }
+      :host:hover
+      {
+        box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 18px 0 rgba(0, 0, 0, 0.12),
+                  0 3px 5px -1px rgba(0, 0, 0, 0.4);
+      }
+      paper-card
+      {
+        width:100%;
+        height: 160px;
+        overflow: hidden;
+      }
+
+      .card-image-container
+      {
+        width: 240px;
+        height: 160px;
+        margin: 0;
+        padding: 0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+        position: relative;
+        display: block;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        float:left;
+        margin-right: 16px;
+      }
+      .card-image
+      {
+        width: 230px;
+        height: 160px;
+        margin: 0;
+        padding: 0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+      }
+      .card-content
+      {
+        color: var(--paper-grey-700);
+        /*height: 130px;
+        overflow: hidden;*/
+        word-break: break-word;
+        display: block;
+        position: absolute;
+        left: 230px;
+        top: -6px;
+        bottom: 40px;
+        overflow: hidden;
+        text-align: left;
+      }
+      .card-content .card-heading
+      {
+        font-size: 20px;
+        color: var(--paper-grey-900);
+        margin-bottom: 4px;
+      }
+
+      .card-actions
+      {
+        font-size: 14px;
+        padding: 8px 12px;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 230px;
+      }
+      .card-actions iron-icon
+      {
+        width: 22px;
+        height: 22px;
+        position: relative;
+        top: 1px;
+        margin-right: 6px;
+      }
+      .card-actions paper-progress
+      {
+        min-width: 0;
+        width: 100px;
+        display: inline-block;
+      }
+      .card-actions strong
+      {
+        position: relative;
+        top: 3px;
+        margin-right: 8px;
+      }
+      .card-actions .hotness
+      {
+        color: var(--paper-red-500);
+        float: right;
+      }
+      .card-actions .bias
+      {
+        color: var(--paper-blue-500);
+        float: left;
+        text-align: left;
+      }
+      .card-actions .sentiment
+      {
+        color: var(--paper-green-500);
+        float: right;
+        margin-right: 12px;
+      }
+      .card-actions .hotness paper-progress
+      {
+        --paper-progress-active-color: var(--paper-red-500);
+      }
+      .card-actions .bias paper-progress
+      {
+        --paper-progress-active-color: var(--paper-blue-500);
+      }
+      .card-actions .sentiment paper-progress
+      {
+        --paper-progress-active-color: var(--paper-green-500);
+      }
+    </style>
+
+    <paper-card on-tap="openArticle">
+      <div class="card-image-container">
+        <div class="card-image" style="background-color: {{randomColor()}}; background-image: url('[[article.image]]')"></div>
+      </div>
+      <div class="card-content">
+        <div class="card-heading">[[article.title]]</div>
+        [[article.text]]
+      </div>
+      <div class="card-actions">
+        <span class="bias"><iron-icon icon="mdi:scale-balance"></iron-icon><strong><paper-progress value="{{getObjectivity(article.objectivity)}}" style="margin-right:10px;top:-3px"></paper-progress>{{getObjectivityString(article.objectivity)}}</strong></span>
+        <span class="hotness"><iron-icon icon="mdi:fire"></iron-icon><paper-progress value="[[article.hotness]]"></paper-progress></span>
+        <span class="sentiment"><iron-icon icon="{{getSentimentIcon(article.polarity)}}"></iron-icon><strong>{{getPolarityString(article.polarity)}}</strong></span>
+        <!-- <span class="count"><strong>[[article.shares]]</strong> shares</span> -->
+      </div>
+    </paper-card>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'paper-article',
+      properties: {
+        article: {type: Object, notify: true}
+      },
+      getObjectivity: function(objectivity)
+      {
+        return objectivity * 100;
+      },
+      getSentiment: function(polarity)
+      {
+        return polarity * 200;
+      },
+      getSentimentIcon: function(polarity)
+      {
+        polarity *= 2;
+        if (polarity > 0.1) { return "mdi:emoticon-happy"; }
+        else if (polarity < -0.1) { return "mdi:emoticon-sad"; }
+        else { return "mdi:emoticon-neutral"; }
+      },
+      getPolarityString: function(polarity)
+      {
+        polarity*=2;
+        if (polarity > 0.7) { return "Strongly Positive"; }
+        else if (polarity < -0.7) { return "Strongly Negative"; }
+        else if (polarity > 0.5) { return "Positive"; }
+        else if (polarity < -0.5) { return "Negative"; }
+        else if (polarity > 0.25) { return "Somewhat Positive"; }
+        else if (polarity < -0.25) { return "Somewhat Negative"; }
+        else if (polarity > 0.1) { return "Slightly Positive"; }
+        else if (polarity < -0.1) { return "Slightly Negative"; }
+        else if (Math.abs(polarity) > 0.01) { return "Mostly Neutral";}
+        else { return "Neutral"; }
+      },
+      getObjectivityString: function(objectivity) {
+        if (objectivity > 0.85) { return "Objective"; }
+        else if (objectivity > 0.6) {return "Likely Objective"; }
+        else if (objectivity < 0.15) { return "Biased"; }
+        else if (objectivity < 0.4) { return "Likely Biased"; }
+        else { return "Potentially Biased"; }
+      },
+      imageClass: function(image)
+      {
+        return (image !== undefined && image != null && image.length > 0) ? "background:-moz-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 40%);background:-webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 100%);background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 40%);filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#a6000000',GradientType=0 );" : "";
+      },
+      randomColor: function()
+      {
+        var colors = [ "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#009688", "#43A047", "#039BE5", "#0097A7", "#EF6C00"];
+        return colors[Math.floor(Math.random()*colors.length)];
+      },
+      hasLocation: function(location)
+      {
+        if ((location !== undefined) && (location != null))
+        {
+          return location.length > 0;
+        }
+        else { return false; }
+      },
+      openArticle: function()
+      {
+        console.log("Open article!");
+        var win = window.open(this.article.url, '_blank');
+        win.focus();
+      }
+    });
+  </script>
+
+</dom-module>

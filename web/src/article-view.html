@@ -15,6 +15,7 @@
 <link rel="import" href="../lib/paper-tooltip/paper-tooltip.html">
 
 <link rel="import" href="mdi.html">
+<link rel="import" href="paper-article.html">
 
 <dom-module id="article-view">
   <template>
@@ -349,6 +350,11 @@
           <template is="dom-if" if="{{hasSentiment}}">
             <paper-button on-tap="analyze" id="analyze" $disabled="{{hasStartedAnalysis}}" $hidden="{{analysisDone}}">Analyze now</paper-button>
           </template>
+          <div class="container">
+            <template is="dom-repeat" items="{{articles}}">
+              <paper-article article="{{item}}"></paper-article>
+            </template>
+          </div>
         </div>
       </div>
       <div class="bottom">
@@ -422,7 +428,7 @@
         else { this.set("sentimentIcon", "mdi:emoticon-neutral"); }
 
         this.set("bias", data.objectivity * 100);
-        this.set("sentiment", data.polarity * 100);
+        this.set("sentiment", Math.abs(data.polarity) * 100);
       },
       articleChanged: function(article, page) {
         if ((page == "articleView") && (article !== undefined))
@@ -481,6 +487,7 @@
           }
           t.updateSentiment({objectivity: sumObjectivity / data.articles.length,
              polarity: sumPolarity / data.articles.length });
+          t.set("articles", data.articles);
           t.set("analysisDone", true);
         })
         .fail(function(data, data2, data3) {
@@ -530,7 +537,11 @@
       },
       hasLocation: function(location)
       {
-        return (location.length > 0);
+        if ((location !== undefined) && (location != null))
+        {
+          return location.length > 0;
+        }
+        else { return false; }
       },
       closeWindow: function()
       {

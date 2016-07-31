@@ -38,7 +38,7 @@ exports.getAnalysisStatus = function(eventUri, cb)
 
 getArticles = function(session, eventUri, lang, page, cb)
 {
-  request('http://eventregistry.org/json/event?eventUri=' + eventUri + '&action=getEvent&resultType=articles&articlesLang=' + lang + '&articlesSortBy=socialScore&articlesCount=200&articlesIncludeArticleImage=false&articlesIncludeArticleSocialScore=false&articlesPage=' + page, { jar: session }, function(error, response, body) { //sortBy=cosSim
+  request('http://eventregistry.org/json/event?eventUri=' + eventUri + '&action=getEvent&resultType=articles&articlesLang=' + lang + '&articlesSortBy=socialScore&articlesCount=200&articlesIncludeArticleImage=true&articlesIncludeArticleSocialScore=true&articlesPage=' + page, { jar: session }, function(error, response, body) { //sortBy=cosSim
     if (error || response.statusCode != 200) {
       console.error(body);
       console.error(error);
@@ -64,6 +64,16 @@ analyzeArticle = function(article, cb)
   result.sourceUrl = article.source.uri;
   result.date = article.date + " " + article.time;
   result.relevance = article.sim;
+  result.image = article.image;
+  async.reduce(Object.keys(article.socialScore), 0, function(shares, key, callback) {
+    if (article.socialScore.hasOwnProperty(key)) {
+      callback(null, shares + article.socialScore[key]);
+    }
+  }, function(err, shares)
+  {
+    result.hotness = 1.2261*((shares)^(0.5779));
+    result.shares = shares;
+  });
 
   //2. Download article
   var session = request.jar();
