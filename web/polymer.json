@@ -1,0 +1,1 @@
+ { "entrypoint": "index.html", "shell": "src/app-index.html", "fragments": [ "src/article-list.html","src/article-view.html","src/concept-search.html" ] }

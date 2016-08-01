@@ -1,7 +1,13 @@
 #Save this file as example.yml after filling in all fields!
 
+#Port to host the server on
 port: 8000
+
+#If true, add cross-site origin header to "origin"
 debug: true
+origin: http://127.0.0.1:8000
+
+#Python server address for machine learning
 pythonServer: http://127.0.0.1:8002
 
 #Get an account at http://eventregistry.org
@@ -10,3 +16,4 @@ eventRegistryPassword: pass
 
 #Get one at https://developer.nytimes.com/
 nyTimesApiKey: apikey
+

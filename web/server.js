@@ -23,6 +23,7 @@ if (fs.existsSync("private.yml"))
   config.port = cfg.port || process.env.PORT || 8000;
   config.er_email = cfg.eventRegistryEmail;
   config.er_pass = cfg.eventRegistryPassword;
+  config.origin = cfg.origin;
   console.log(config);
 
   debug = cfg.debug || false;
@@ -52,7 +53,7 @@ request.post('http://eventregistry.org/login',
 
 /** PUBLIC API **/
 app.get('/api/1/trending/images', function(req, res) {
-	if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+	if (debug) res.header("Access-Control-Allow-Origin", config.origin);
 	cache.updateTrendingImages(session, function()
 	{
 		res.status(cache.get().trending.images.status).json(
@@ -63,7 +64,7 @@ app.get('/api/1/trending/images', function(req, res) {
 });
 
 app.get('/api/1/trending/suggest', function(req, res) {
-	if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+	if (debug) res.header("Access-Control-Allow-Origin", config.origin);
 	cache.updateTrending(session, function()
 	{
 		res.status(cache.get().trending.suggest.status).json(
@@ -74,7 +75,7 @@ app.get('/api/1/trending/suggest', function(req, res) {
 });
 
 app.get('/api/1/stats/string', function(req, res) {
-	if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+	if (debug) res.header("Access-Control-Allow-Origin", config.origin);
 	cache.updateStatsString(session, function()
 	{
 		res.status(cache.get().stats.string.status).json(
@@ -85,7 +86,7 @@ app.get('/api/1/stats/string', function(req, res) {
 });
 
 app.get('/api/1/events', function(req, res) {
-  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  if (debug) res.header("Access-Control-Allow-Origin", config.origin);
   console.log("Get event list for: " + req.query.q + " (" + req.query.uri + ")");
   now.getEvents(session, req.query.uri, req.query.lang || "eng", function(data)
   {
@@ -96,7 +97,7 @@ app.get('/api/1/events', function(req, res) {
 });
 
 app.get('/api/1/event', function(req, res) {
-  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  if (debug) res.header("Access-Control-Allow-Origin", config.origin);
   console.log("Get event data for event " + req.query.uri);
   analysis.getEventData(session, req.query.uri, req.query.lang || "eng", req.query.desc, req.query.title, function(err, data)
   {
@@ -106,7 +107,7 @@ app.get('/api/1/event', function(req, res) {
 });
 
 app.get('/api/1/analyze', function(req, res) {
-  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  if (debug) res.header("Access-Control-Allow-Origin", config.origin);
   analysis.analyzeEvent(session, req.query.uri, req.query.lang || "eng", function(err, data)
   {
     var status = (err == null) ? 200 : 500;
@@ -115,7 +116,7 @@ app.get('/api/1/analyze', function(req, res) {
 })
 
 app.get('/api/1/analyze/status', function(req, res) {
-  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  if (debug) res.header("Access-Control-Allow-Origin", config.origin);
   analysis.getAnalysisStatus(req.query.uri, function(err, data)
   {
     var status = (err == null) ? 200 : 500;
@@ -124,7 +125,7 @@ app.get('/api/1/analyze/status', function(req, res) {
 })
 
 app.get('/api/1/util/imagecolor', function(req, res) {
-  if (debug) res.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  if (debug) res.header("Access-Control-Allow-Origin", config.origin);
   util.getImageColor(req.query.url, function(err, data)
   {
     console.log(data);
@@ -134,6 +135,6 @@ app.get('/api/1/util/imagecolor', function(req, res) {
 })
 
 /** LISTEN **/
-app.listen(8001, function () {
-  console.log('Listening on port 8001!');
+app.listen(config.port, function () {
+  console.log('Listening on port ' + config.port + '!');
 });
