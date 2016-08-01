@@ -28,6 +28,7 @@ if (fs.existsSync("private.yml"))
   debug = cfg.debug || false;
   cache.setDebug(debug);
   cache.setApiKey(cfg.nyTimesApiKey);
+  analysis.setServerAddress(cfg.pythonServer);
 }
 else {
   console.error("***** No 'private.yml' found! Things will break! *****");

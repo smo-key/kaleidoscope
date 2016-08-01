@@ -10,3 +10,4 @@ build/
 
 #Custom
 web/private.yml
+web/private.js

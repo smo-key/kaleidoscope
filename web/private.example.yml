@@ -2,6 +2,7 @@
 
 port: 8000
 debug: true
+pythonServer: http://127.0.0.1:8002
 
 #Get an account at http://eventregistry.org
 eventRegistryEmail: email@example.com

@@ -163,6 +163,7 @@
 
   <script src="/lib/jquery/dist/jquery.min.js"></script>
   <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/private.js"></script>
   <script>
     var suggestPrevValue = "";
 
@@ -277,7 +278,6 @@
         }, 1200);
 
         /** IMMEDIATE API CALLS **/
-        const server = "http://localhost:8001"
         //Get usage stats
         jQuery.get(server + "/api/1/stats/string")
         .done(function(data) {

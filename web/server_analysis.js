@@ -6,7 +6,11 @@ var _ = require('lodash');
 
 const maxEventCount = 100; //increments of eventsInSingleRequest
 const eventsInSingleRequest = 100;
-const ml_server = "http://127.0.0.1:8002";
+var ml_server = "http://127.0.0.1:8002";
+exports.setServerAddress = function(address)
+{
+  ml_server = address;
+}
 
 var analysis = { };
 
