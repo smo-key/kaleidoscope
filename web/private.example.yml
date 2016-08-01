@@ -1,0 +1,11 @@
+#Save this file as example.yml after filling in all fields!
+
+port: 8000
+debug: true
+
+#Get an account at http://eventregistry.org
+eventRegistryEmail: email@example.com
+eventRegistryPassword: pass
+
+#Get one at https://developer.nytimes.com/
+nyTimesApiKey: apikey

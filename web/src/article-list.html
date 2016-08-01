@@ -310,7 +310,7 @@
           }
         })
         .fail(function() {
-          warn("Failed to get trending suggestions");
+          console.warn("Failed to get trending suggestions");
         })
         .always(function() {
           placeholderLoop();
@@ -474,7 +474,7 @@
             }
           })
           .fail(function(data, data2, data3) {
-            warn("Failed to get events for query '" + search + "'");
+            console.warn("Failed to get events for query '" + search + "'");
             jQuery("#search-event").prop("disabled", false);
             jQuery("paper-progress.loading").prop("hidden", true);
             t.set('events', [ ]);

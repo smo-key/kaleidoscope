@@ -3,9 +3,14 @@ var time = require('moment');
 var util = require("./server_util.js");
 
 var debug = false;
+var apiKey = "";
 exports.setDebug = function(bool)
 {
   debug = bool;
+}
+exports.setApiKey = function(key)
+{
+  apiKey = key;
 }
 
 /** CACHED FUNCTIONS **/
@@ -100,7 +105,7 @@ exports.updateTrendingImages = function(session, cb)
     cache.trending.images.time = time(new Date());
     console.log("Updating trending images...");
 
-	  request('https://api.nytimes.com/svc/topstories/v2/home.json?apikey=***REMOVED***', function(error, response, body1) {
+	  request('https://api.nytimes.com/svc/topstories/v2/home.json?apikey=' + apiKey, function(error, response, body1) {
 	    if (error || response.statusCode != 200) {
 				cache.trending.images.status = 500;
 				cache.trending.images.error = error;
@@ -113,7 +118,7 @@ exports.updateTrendingImages = function(session, cb)
 				cache.trending.images.images = [ ];
 	      var im1 = parseTrendingImages(json1);
 
-	      request('https://api.nytimes.com/svc/topstories/v2/world.json?apikey=***REMOVED***', function(error, response, body2) {
+	      request('https://api.nytimes.com/svc/topstories/v2/world.json?apikey=' + apiKey, function(error, response, body2) {
 	        if (error || response.statusCode != 200) {
 						cache.trending.images.status = 500;
 						cache.trending.images.error = error;
@@ -124,7 +129,7 @@ exports.updateTrendingImages = function(session, cb)
 	          var json2 = JSON.parse(body2);
 	          var im2 = parseTrendingImages(json2);
 
-	          request('https://api.nytimes.com/svc/topstories/v2/national.json?apikey=***REMOVED***', function(error, response, body3) {
+	          request('https://api.nytimes.com/svc/topstories/v2/national.json?apikey=' + apiKey, function(error, response, body3) {
 	            if (error || response.statusCode != 200) {
 								cache.trending.images.status = 500;
 								cache.trending.images.error = error;
