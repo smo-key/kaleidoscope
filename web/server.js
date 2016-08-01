@@ -3,6 +3,7 @@ var app = express();
 var request = require('request');
 var morgan = require('morgan');
 var yaml = require("js-yaml");
+var fs = require('fs');
 var cache = require("./server_cache.js");
 var now = require("./server_now.js");
 var analysis = require("./server_analysis.js");
