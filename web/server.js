@@ -85,6 +85,11 @@ app.get('/api/1/stats/string', function(req, res) {
 	});
 });
 
+app.get('/api/1/suggest', function(req, res) {
+  if (debug) res.header("Access-Control-Allow-Origin", config.origin);
+  request.get("http://eventregistry.org/json/suggestConcepts?prefix=" + req.query.q + "&lang=eng&source=concepts&source=conceptClass").pipe(res);
+});
+
 app.get('/api/1/events', function(req, res) {
   if (debug) res.header("Access-Control-Allow-Origin", config.origin);
   console.log("Get event list for: " + req.query.q + " (" + req.query.uri + ")");
@@ -132,7 +137,7 @@ app.get('/api/1/util/imagecolor', function(req, res) {
     var status = (err == null) ? 200 : 500;
     res.status(status).json(data);
   });
-})
+});
 
 /** LISTEN **/
 app.listen(config.port, function () {

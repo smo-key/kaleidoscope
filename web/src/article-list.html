@@ -209,7 +209,7 @@
         <p>Website Copyright (C) Arthur Pachachura</p>
       </div>
       <div class="col-xs-4" style="text-align: right">
-        <p>Article aggregation powered by <a class="white" href="https://eventregistry.org">EventRegistry</a></o>
+        <p>Article aggregation powered by <a class="white" href="http://eventregistry.org">EventRegistry</a></o>
       </div>
     </div>
 
@@ -383,7 +383,7 @@
             if (t.search == search && !t.searching)
             {
               console.log("Getting suggestions for " + suggestPrevValue);
-              jQuery.get("http://eventregistry.org/json/suggestConcepts?prefix=" + encodeURIComponent(text) + "&lang=eng&source=concepts&source=conceptClass")
+              jQuery.get(server + "/api/1/suggest?q=" + encodeURIComponent(text))
               .done(function(data) {
                 data = JSON.parse(data);
                 jQuery('#searchsuggest').remove();
