@@ -224,6 +224,7 @@
             //Get suggestions
             jQuery.get(server + "/api/1/suggest?q=" + encodeURIComponent(text))
             .done(function(data) {
+              console.log(data);
               data = JSON.parse(data);
               jQuery('#searchsuggest').remove();
               var html = "<paper-listbox id='searchsuggest' selected='0'>";

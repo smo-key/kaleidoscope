@@ -87,7 +87,9 @@ app.get('/api/1/stats/string', function(req, res) {
 
 app.get('/api/1/suggest', function(req, res) {
   if (debug) res.header("Access-Control-Allow-Origin", config.origin);
-  request.get("http://eventregistry.org/json/suggestConcepts?prefix=" + req.query.q + "&lang=eng&source=concepts&source=conceptClass").pipe(res);
+  request.get("http://eventregistry.org/json/suggestConcepts?prefix=" + req.query.q + "&lang=eng&source=concepts&source=conceptClass", function(e,r,data) {
+	res.status(200).json(data);
+  });
 });
 
 app.get('/api/1/events', function(req, res) {

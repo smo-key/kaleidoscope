@@ -1,1 +1,6 @@
- { "entrypoint": "index.html", "shell": "src/app-index.html", "fragments": [ "src/article-list.html","src/article-view.html","src/concept-search.html" ] }
+ { "entrypoint": "index.html", "shell": "src/app-index.html", "fragments": [ "src/article-list.html","src/article-view.html","src/concept-search.html" ],
+"includeDependencies": [
+    "lib/webcomponentsjs/webcomponents-lite.min.js",
+    "lib/jquery/dist/jquery.min.js",
+    "lib/bootstrap/dist/css/bootstrap.min.css"
+  ] }
