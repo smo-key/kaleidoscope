@@ -65,9 +65,10 @@ analyzeArticle = function(article, cb)
   result.date = article.date + " " + article.time;
   result.relevance = article.sim;
   result.image = article.image;
-  async.reduce(Object.keys(article.socialScore), 0, function(shares, key, callback) {
-    if (article.socialScore.hasOwnProperty(key)) {
-      callback(null, shares + article.socialScore[key]);
+  console.log(article);
+  async.reduce(Object.keys(article.shares), 0, function(shares, key, callback) {
+    if (article.shares.hasOwnProperty(key)) {
+      callback(null, shares + article.shares[key]);
     }
   }, function(err, shares)
   {
